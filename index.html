@@ -3,113 +3,140 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>B training — Coaching & Performance</title>
+  <title>B training — Plateforme Coaching & Performance</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script>
-    // Configure Tailwind CSS with dark athletic palette and Inter font
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-          },
-          colors: {
-            obsidian: '#090d16',
-            card: '#111827',
-            cardElevated: '#172033',
-            accent: '#38bdf8',
-            accentEmerald: '#10b981',
-            accentAmber: '#f59e0b',
+    try {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            },
+            colors: {
+              obsidian: '#09090b',
+              cardDark: '#121216',
+            },
           },
         },
-      },
-    };
+      };
+    } catch (e) {}
   </script>
+  <!-- Styles de secours complets garantissant un rendu impeccable même hors-ligne -->
   <style>
-    /* Custom scrollbar and subtle athletic glassmorphism helpers */
-    body {
-      background-color: #090d16;
-      color: #f8fafc;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-color: #09090b;
+      color: #fafafa;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
-
-    .glass-panel {
-      background: rgba(17, 24, 39, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(148, 163, 184, 0.12);
+    .bg-obsidian { background-color: #09090b; }
+    .glass-card {
+      background: rgba(18, 18, 22, 0.95);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
     }
-
-    .set-checkbox:checked {
-      background-color: #10b981;
-      border-color: #10b981;
+    .btn-gradient {
+      background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%);
+      color: #09090b;
     }
-
-    @keyframes pulseSoft {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.65; }
+    .btn-gradient:hover {
+      filter: brightness(1.06);
     }
-
-    .animate-pulse-soft {
-      animation: pulseSoft 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    .set-checkbox {
+      accent-color: #f97316;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.9); }
+    }
+    .animate-pulse-dot {
+      animation: pulseDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
   </style>
 </head>
-<body class="min-h-screen bg-obsidian text-slate-100 antialiased selection:bg-sky-500/30 selection:text-sky-200">
-  <!-- Main Application Root -->
+<body class="min-h-screen bg-obsidian text-zinc-100 antialiased selection:bg-orange-500/30 selection:text-orange-200">
+  <!-- Conteneur principal rendu immédiatement de manière synchrone -->
   <div id="app" class="min-h-screen flex flex-col"></div>
 
-  <!-- Toast / Non-blocking Alert Banner -->
+  <!-- Notifications non bloquantes -->
   <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-3 sm:px-0"></div>
 
-  <!-- Modal Container for Exercise Video / Machine Execution Guide & Editing -->
-  <div id="modal-backdrop" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div id="modal-card" class="glass-panel rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-700/70"></div>
+  <!-- Modale universelle -->
+  <div id="modal-backdrop" onclick="if(event.target===this) closeModal()" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div id="modal-card" class="glass-card rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-zinc-700/80"></div>
   </div>
 
-  <!-- Floating Rest Timer Bar (Athlete Mode) -->
-  <div id="rest-timer-widget" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 hidden w-[94%] max-w-md glass-panel rounded-2xl p-4 shadow-2xl border border-sky-400/35">
+  <!-- Chronomètre de repos flottant (Mode Athlète) -->
+  <div id="rest-timer-widget" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 hidden w-[94%] max-w-md glass-card rounded-2xl p-4 shadow-2xl border border-orange-500/50">
     <div class="flex items-center justify-between gap-3">
       <div class="flex items-center gap-3 min-w-0">
-        <div class="h-11 w-11 rounded-xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center shrink-0">
-          <span id="timer-countdown" class="text-sm font-extrabold text-sky-300 tabular-nums">01:30</span>
+        <div class="h-12 w-14 rounded-xl bg-orange-500/15 border border-orange-500/40 flex items-center justify-center shrink-0">
+          <span id="timer-countdown" class="text-sm font-black text-orange-400 tabular-nums">01:30</span>
         </div>
         <div class="min-w-0">
-          <p class="text-xs uppercase tracking-wider text-sky-400 font-semibold">Temps de repos actif</p>
-          <p id="timer-context" class="text-sm font-medium text-slate-200 truncate">Série validée • Récupération</p>
+          <p class="text-[11px] uppercase tracking-wider text-orange-400 font-bold">Chronomètre de repos</p>
+          <p id="timer-context" class="text-xs sm:text-sm font-medium text-zinc-200 truncate">Série validée • Récupération</p>
         </div>
       </div>
       <div class="flex items-center gap-1.5 shrink-0">
-        <button type="button" onclick="adjustRestTimer(-15)" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition" title="-15s">-15s</button>
-        <button type="button" onclick="adjustRestTimer(15)" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition" title="+15s">+15s</button>
-        <button type="button" onclick="stopRestTimer()" class="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 text-xs font-bold text-emerald-300 transition">Passer</button>
+        <button type="button" onclick="adjustRestTimer(-15)" class="px-2.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200 transition">-15s</button>
+        <button type="button" onclick="adjustRestTimer(15)" class="px-2.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200 transition">+15s</button>
+        <button type="button" onclick="stopRestTimer()" class="px-3 py-2 rounded-xl bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/40 text-xs font-bold text-orange-300 transition">Passer</button>
       </div>
     </div>
-    <div class="mt-3 h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-      <div id="timer-progress-bar" class="h-full bg-gradient-to-r from-sky-400 to-emerald-400 transition-all duration-300" style="width: 100%;"></div>
+    <div class="mt-3 h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+      <div id="timer-progress-bar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-300" style="width: 100%;"></div>
     </div>
   </div>
 
-  <!-- Firebase Modular SDK + Complete B training Logic -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc,
-      setDoc,
-      onSnapshot
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  <!-- SCRIPT PRINCIPAL 100 % SYNCHRONE : AUCUNE DÉPENDANCE RÉSEAU BLOQUANTE -->
+  <script>
+    // =========================================================================
+    // 1. STOCKAGE SÉCURISÉ (MÉMOIRE VIVE + LOCALSTORAGE PROTÉGÉ EN IFRAME)
+    // =========================================================================
+    const MEMORY_STORE = {};
+    const STORAGE_KEYS = {
+      GYMS: "btraining_v4_gyms",
+      EXERCISES: "btraining_v4_exercises",
+      ATHLETES: "btraining_v4_athletes",
+      CHECKINS: "btraining_v4_checkins"
+    };
 
-    // -------------------------------------------------------------------------
-    // 1. FIREBASE FIRESTORE CONFIGURATION (Project: b-training-2ee96)
-    // -------------------------------------------------------------------------
-    const firebaseConfig = {
+    function safeGetStorage(key) {
+      if (Object.prototype.hasOwnProperty.call(MEMORY_STORE, key)) {
+        return MEMORY_STORE[key];
+      }
+      try {
+        const val = window.localStorage.getItem(key);
+        if (val !== null) MEMORY_STORE[key] = val;
+        return val;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function safeSetStorage(key, value) {
+      MEMORY_STORE[key] = value;
+      try {
+        window.localStorage.setItem(key, value);
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 2. CONFIGURATION FIREBASE & DONNÉES DE RÉFÉRENCE EN FRANÇAIS
+    // =========================================================================
+    window.BTRAINING_FIREBASE_CONFIG = {
       apiKey: "AIzaSyAI00Bq3tbseZD91t9LxmiuirmI1D3ppCM",
       authDomain: "b-training-2ee96.firebaseapp.com",
       projectId: "b-training-2ee96",
@@ -119,272 +146,1009 @@
       measurementId: "G-9DWVF721BP"
     };
 
-    const LOCAL_STORAGE_KEY = "b_training_state_v1";
-    const FIRESTORE_DOC_PATH = ["b_training_app", "main_state"];
+    const MACHINES_REFERENTIEL = [
+      "Presse à cuisses",
+      "Hack Squat",
+      "Poulie vis-à-vis",
+      "Tirage vertical",
+      "Smith Machine",
+      "Haltères & Banc",
+      "Barre olympique & Rack",
+      "Poids du corps / Barre fixe",
+      "Tapis de course / Rameur",
+      "Machines guidées"
+    ];
 
-    // Initial seed data so the app works richly out-of-the-box
-    const DEFAULT_STATE = {
-      athletes: [
-        {
-          id: "ath_lucas",
-          code: "LUCAS-2026",
-          name: "Lucas Moreau",
-          sport: "Hypertrophie & Force Athlétique",
-          objective: "Prise de masse propre +8kg & progression Bench/Squat",
-          status: "Actif",
-          workouts: [
-            {
-              id: "wk_upper_a",
-              title: "Séance A — Haut du Corps & Push",
-              focus: "Pectoraux, Épaules, Triceps",
-              restDefault: 90,
-              exercises: [
-                {
-                  id: "ex_bench",
-                  name: "Développé Couché Barre",
-                  machine: "Banc olympique + Barre 20kg + Pare-barres réglés",
-                  setsCount: 4,
-                  repsTarget: "8-10 reps",
-                  loadHint: "82.5 kg",
-                  restSec: 120,
-                  videoUrl: "https://www.youtube.com/watch?v=rT7DgCr-3pg",
-                  executionTip: "Omoplates rétractées et ancrées dans le banc, pieds à plat au sol, descente contrôlée (3s) vers le bas des pectoraux sans rebond.",
-                  machineTip: "Vérifie les crochets de sécurité juste sous la ligne thoracique basse et aligne le centre de la barre avec le nez avant de décrocher.",
-                  completedSets: [true, true, false, false],
-                  loggedLoads: ["82.5kg x 9", "82.5kg x 8", "82.5kg x ?", "82.5kg x ?"]
-                },
-                {
-                  id: "ex_incline_db",
-                  name: "Développé Incliné Haltères",
-                  machine: "Banc incliné à 30° + Paire d'haltères",
-                  setsCount: 3,
-                  repsTarget: "10-12 reps",
-                  loadHint: "30 kg / main",
-                  restSec: 90,
-                  videoUrl: "https://www.youtube.com/watch?v=8iPEnn-ltC8",
-                  executionTip: "Coudes à ~45° du buste, léger rapprochement des haltères en haut sans claquer les poids.",
-                  machineTip: "Règle l'inclinaison sur 30° (pas 45°+) pour cibler le faisceau claviculaire des pectoraux sans surcharger l'avant de l'épaule.",
-                  completedSets: [false, false, false],
-                  loggedLoads: ["30kg x ?", "30kg x ?", "30kg x ?"]
-                },
-                {
-                  id: "ex_cable_fly",
-                  name: "Écarté Poulie Vis-à-Vis",
-                  machine: "Station poulies doubles (réglage bas/médian)",
-                  setsCount: 3,
-                  repsTarget: "12-15 reps",
-                  loadHint: "17.5 kg / côté",
-                  restSec: 75,
-                  videoUrl: "https://www.youtube.com/watch?v=Iwe6AmxVf7o",
-                  executionTip: "Légère flexion fixe des coudes, arc de cercle ample et contraction isométrique 1s en fin de mouvement.",
-                  machineTip: "Place les poulies au niveau du bassin ou légèrement plus bas et avance d'un pas pour garder une tension continue en étirement.",
-                  completedSets: [false, false, false],
-                  loggedLoads: ["17.5kg x ?", "17.5kg x ?", "17.5kg x ?"]
-                }
-              ]
-            },
-            {
-              id: "wk_lower_b",
-              title: "Séance B — Bas du Corps & Chaîne Postérieure",
-              focus: "Quadriceps, Ischios, Gainage",
-              restDefault: 120,
-              exercises: [
-                {
-                  id: "ex_hack_squat",
-                  name: "Hack Squat Machine",
-                  machine: "Hack Squat guidé à charge libre",
-                  setsCount: 4,
-                  repsTarget: "8-12 reps",
-                  loadHint: "140 kg",
-                  restSec: 120,
-                  videoUrl: "https://www.youtube.com/watch?v=0tn5K9NlCvs",
-                  executionTip: "Bas du dos et tête collés au dossier, descendez jusqu'à ce que les cuisses passent sous la parallèle.",
-                  machineTip: "Place les pieds plus haut sur le plateau pour recruter davantage les fessiers/ischios, ou plus bas pour accentuer les quadriceps.",
-                  completedSets: [false, false, false, false],
-                  loggedLoads: ["140kg x ?", "140kg x ?", "140kg x ?", "140kg x ?"]
-                }
-              ]
-            }
-          ],
-          biometrics: [
-            { id: "bio_1", date: "2026-11-10", weightKg: 78.4, bodyFatPct: 12.8, sleepHours: 7.5, rhrBpm: 56, notes: "Bonne énergie, reprise cycle force" },
-            { id: "bio_2", date: "2026-11-17", weightKg: 79.0, bodyFatPct: 12.6, sleepHours: 8.0, rhrBpm: 54, notes: "+1 rep sur le développé couché" },
-            { id: "bio_3", date: "2026-11-24", weightKg: 79.5, bodyFatPct: 12.4, sleepHours: 7.8, rhrBpm: 53, notes: "Récupération optimale" }
-          ],
-          nutritionLogs: [
-            { id: "nut_1", date: "2026-11-24", calories: 3150, proteinG: 178, carbsG: 365, fatsG: 86, waterL: 3.2, adherencePct: 95 },
-            { id: "nut_2", date: "2026-11-25", calories: 3080, proteinG: 182, carbsG: 345, fatsG: 84, waterL: 3.0, adherencePct: 92 }
-          ],
-          nutritionTarget: { calories: 3100, proteinG: 180, carbsG: 350, fatsG: 85, waterL: 3.0 }
-        },
-        {
-          id: "ath_chloe",
-          code: "CHLOE-2026",
-          name: "Chloé Delacroix",
-          sport: "Running Trail & Renforcement",
-          objective: "Prépa 25km Trail + stabilité articulaire",
-          status: "Actif",
-          workouts: [
-            {
-              id: "wk_chloe_1",
-              title: "Renforcement Trail & Stabilité",
-              focus: "Fessiers moyens, Chevilles, Core",
-              restDefault: 60,
-              exercises: [
-                {
-                  id: "ex_rdl",
-                  name: "Soulevé de Terre Roumain Haltères",
-                  machine: "Paire d'haltères + Tapis antidérapant",
-                  setsCount: 3,
-                  repsTarget: "10-12 reps",
-                  loadHint: "22 kg / main",
-                  restSec: 90,
-                  videoUrl: "https://www.youtube.com/watch?v=7j-2w4-GuEM",
-                  executionTip: "Hanches poussées vers l'arrière, dos neutre, haltères frôlant les cuisses jusqu'à l'étirement des ischios.",
-                  machineTip: "Évite de cambrer excessivement le bas du dos en fin de descente ; stoppe dès que le bassin amorce une rétroversion.",
-                  completedSets: [true, false, false],
-                  loggedLoads: ["22kg x 12", "22kg x ?", "22kg x ?"]
-                }
-              ]
-            }
-          ],
-          biometrics: [
-            { id: "bio_c1", date: "2026-11-22", weightKg: 58.2, bodyFatPct: 18.5, sleepHours: 8.2, rhrBpm: 50, notes: "Sortie longue sans douleur genou" }
-          ],
-          nutritionLogs: [
-            { id: "nut_c1", date: "2026-11-25", calories: 2350, proteinG: 125, carbsG: 270, fatsG: 68, waterL: 2.5, adherencePct: 90 }
-          ],
-          nutritionTarget: { calories: 2400, proteinG: 125, carbsG: 280, fatsG: 70, waterL: 2.5 }
-        }
-      ]
-    };
+    const DEFAULT_GYMS = [
+      {
+        id: "gym-baule",
+        nom: "Gigafit La Baule",
+        ville: "La Baule-Escoublac",
+        machines: [
+          "Presse à cuisses",
+          "Hack Squat",
+          "Poulie vis-à-vis",
+          "Tirage vertical",
+          "Smith Machine",
+          "Haltères & Banc",
+          "Barre olympique & Rack",
+          "Poids du corps / Barre fixe",
+          "Tapis de course / Rameur",
+          "Machines guidées"
+        ]
+      },
+      {
+        id: "gym-guerande",
+        nom: "Basic-Fit Guérande",
+        ville: "Guérande",
+        machines: [
+          "Presse à cuisses",
+          "Poulie vis-à-vis",
+          "Tirage vertical",
+          "Smith Machine",
+          "Haltères & Banc",
+          "Barre olympique & Rack",
+          "Tapis de course / Rameur",
+          "Machines guidées"
+        ]
+      },
+      {
+        id: "gym-home",
+        nom: "Home Studio",
+        ville: "Domicile / Studio Privé",
+        machines: [
+          "Haltères & Banc",
+          "Poids du corps / Barre fixe",
+          "Tapis de course / Rameur"
+        ]
+      }
+    ];
 
-    // -------------------------------------------------------------------------
-    // 2. APPLICATION STATE & FIRESTORE REAL-TIME SYNC WITH LOCAL FALLBACK
-    // -------------------------------------------------------------------------
-    let appState = loadLocalState();
-    let db = null;
-    let firestoreConnected = false;
-    let unsubscribeSnapshot = null;
+    const DEFAULT_EXERCISES = [
+      // PECTORAUX (4)
+      {
+        id: "ex-01",
+        nom: "Développé couché barre",
+        groupe: "Pectoraux",
+        machine: "Barre olympique & Rack",
+        setsDefault: 4,
+        repsDefault: "8-10",
+        loadDefault: "75 kg",
+        restSec: 120,
+        reglage: "Banc plat centré sous le rack, yeux alignés sous la barre, pieds bien ancrés au sol.",
+        execution: "Omoplates serrées, descends la barre au bas des pectoraux en contrôlant 2 secondes puis pousse explosif.",
+        videoUrl: "https://www.youtube.com/results?search_query=developpe+couche+barre+technique"
+      },
+      {
+        id: "ex-02",
+        nom: "Développé incliné haltères",
+        groupe: "Pectoraux",
+        machine: "Haltères & Banc",
+        setsDefault: 4,
+        repsDefault: "10-12",
+        loadDefault: "26 kg / main",
+        restSec: 90,
+        reglage: "Dossier du banc incliné à 30° (2e ou 3e cran).",
+        execution: "Descends les haltères sur les côtés de la poitrine en étirant les pectoraux, remonte sans entrechoquer.",
+        videoUrl: "https://www.youtube.com/results?search_query=developpe+incline+halteres+technique"
+      },
+      {
+        id: "ex-03",
+        nom: "Écarté à la poulie vis-à-vis",
+        groupe: "Pectoraux",
+        machine: "Poulie vis-à-vis",
+        setsDefault: 3,
+        repsDefault: "12-15",
+        loadDefault: "15 kg / côté",
+        restSec: 75,
+        reglage: "Poulies réglées à hauteur d'épaules avec poignées simples.",
+        execution: "Un pied devant pour la stabilité, coudes légèrement fléchis, ramène les mains devant le sternum.",
+        videoUrl: "https://www.youtube.com/results?search_query=ecarte+poulie+vis+a+vis+pectoraux"
+      },
+      {
+        id: "ex-04",
+        nom: "Développé assis machine convergente",
+        groupe: "Pectoraux",
+        machine: "Machines guidées",
+        setsDefault: 3,
+        repsDefault: "10-12",
+        loadDefault: "55 kg",
+        restSec: 90,
+        reglage: "Siège ajusté pour que les poignées soient alignées au milieu des pectoraux.",
+        execution: "Garde le dos plaqué contre le dossier et pousse jusqu'à quasi-extension sans verrouiller les coudes.",
+        videoUrl: "https://www.youtube.com/results?search_query=chest+press+machine+guidee"
+      },
 
-    let session = {
-      role: null, // 'coach' | 'athlete' | null
-      athleteId: null,
-      coachActiveTab: "athletes", // 'athletes' | 'workouts' | 'tracking'
-      selectedCoachAthleteId: "ath_lucas",
-      athleteActiveTab: "workout" // 'workout' | 'tracking'
-    };
+      // DOS (4)
+      {
+        id: "ex-05",
+        nom: "Tirage vertical prise large",
+        groupe: "Dos",
+        machine: "Tirage vertical",
+        setsDefault: 4,
+        repsDefault: "10-12",
+        loadDefault: "55 kg",
+        restSec: 90,
+        reglage: "Boudins bloqués fermement sur le haut des cuisses, barre large.",
+        execution: "Poitrine sortie, tire la barre vers le haut des pectoraux en abaissant les épaules.",
+        videoUrl: "https://www.youtube.com/results?search_query=tirage+vertical+prise+large+dos"
+      },
+      {
+        id: "ex-06",
+        nom: "Tractions pronation",
+        groupe: "Dos",
+        machine: "Poids du corps / Barre fixe",
+        setsDefault: 4,
+        repsDefault: "6-10",
+        loadDefault: "Poids du corps",
+        restSec: 120,
+        reglage: "Prise légèrement plus large que les épaules sur la barre fixe.",
+        execution: "Démarre épaules basses, amène le menton au-dessus de la barre sans balancer les jambes.",
+        videoUrl: "https://www.youtube.com/results?search_query=tractions+pronation+technique"
+      },
+      {
+        id: "ex-07",
+        nom: "Rowing haltère unilatéral sur banc",
+        groupe: "Dos",
+        machine: "Haltères & Banc",
+        setsDefault: 4,
+        repsDefault: "10-12 / côté",
+        loadDefault: "28 kg",
+        restSec: 75,
+        reglage: "Banc plat, un genou et une main en appui, dos parfaitement neutre.",
+        execution: "Tire le coude vers la hanche en gardant l'épaule basse et le buste fixe.",
+        videoUrl: "https://www.youtube.com/results?search_query=rowing+haltere+unilateral+banc"
+      },
+      {
+        id: "ex-08",
+        nom: "Tirage horizontal poulie basse",
+        groupe: "Dos",
+        machine: "Poulie vis-à-vis",
+        setsDefault: 3,
+        repsDefault: "12",
+        loadDefault: "50 kg",
+        restSec: 90,
+        reglage: "Poulie en position basse avec poignée double en V, genoux légèrement fléchis.",
+        execution: "Buste droit, tire la poignée vers le nombril en serrant fort les omoplates.",
+        videoUrl: "https://www.youtube.com/results?search_query=tirage+horizontal+poulie+basse"
+      },
 
-    // Rest Timer State
-    let timerInterval = null;
-    let timerRemaining = 0;
-    let timerTotal = 90;
+      // JAMBES (5)
+      {
+        id: "ex-09",
+        nom: "Squat barre libre",
+        groupe: "Jambes",
+        machine: "Barre olympique & Rack",
+        setsDefault: 4,
+        repsDefault: "6-8",
+        loadDefault: "90 kg",
+        restSec: 150,
+        reglage: "Repose-barre à hauteur de poitrine, barres de sécurité réglées au niveau des hanches.",
+        execution: "Pieds largeur d'épaules, gaine les abdos, descends jusqu'à la parallèle et pousse dans les talons.",
+        videoUrl: "https://www.youtube.com/results?search_query=squat+barre+libre+technique"
+      },
+      {
+        id: "ex-10",
+        nom: "Presse à cuisses inclinée",
+        groupe: "Jambes",
+        machine: "Presse à cuisses",
+        setsDefault: 4,
+        repsDefault: "10-12",
+        loadDefault: "140 kg",
+        restSec: 120,
+        reglage: "Pieds placés au milieu du plateau largeur d'épaules, bas du dos bien plaqué au siège.",
+        execution: "Fléchis les genoux jusqu'à 90° sans décoller le bassin, pousse sans verrouiller complètement.",
+        videoUrl: "https://www.youtube.com/results?search_query=presse+a+cuisses+inclinee+execution"
+      },
+      {
+        id: "ex-11",
+        nom: "Hack Squat guidé",
+        groupe: "Jambes",
+        machine: "Hack Squat",
+        setsDefault: 4,
+        repsDefault: "8-10",
+        loadDefault: "80 kg",
+        restSec: 120,
+        reglage: "Épaules calées sous les coussins, dos bien collé au dossier, pieds légèrement avancés.",
+        execution: "Descente lente et profonde en gardant les genoux dans l'axe des pointes de pieds.",
+        videoUrl: "https://www.youtube.com/results?search_query=hack+squat+machine+technique"
+      },
+      {
+        id: "ex-12",
+        nom: "Squat guidé à la Smith Machine",
+        groupe: "Jambes",
+        machine: "Smith Machine",
+        setsDefault: 3,
+        repsDefault: "10-12",
+        loadDefault: "60 kg",
+        restSec: 90,
+        reglage: "Crochets de sécurité verrouillés juste sous le point bas, pieds avancés de 15 cm.",
+        execution: "Contrôle la descente en gardant le buste vertical, remonte en contractant quadriceps et fessiers.",
+        videoUrl: "https://www.youtube.com/results?search_query=squat+smith+machine+technique"
+      },
+      {
+        id: "ex-13",
+        nom: "Leg Curl & Leg Extension guidés",
+        groupe: "Jambes",
+        machine: "Machines guidées",
+        setsDefault: 3,
+        repsDefault: "12-15",
+        loadDefault: "40 kg",
+        restSec: 75,
+        reglage: "Axe de rotation du genou aligné avec le pivot de la machine, boudin sur les chevilles.",
+        execution: "Amplitude complète avec 1 seconde de maintien en contraction maximale.",
+        videoUrl: "https://www.youtube.com/results?search_query=leg+extension+leg+curl+reglage"
+      },
 
-    function loadLocalState() {
+      // ÉPAULES (3)
+      {
+        id: "ex-14",
+        nom: "Développé militaire haltères assis",
+        groupe: "Épaules",
+        machine: "Haltères & Banc",
+        setsDefault: 4,
+        repsDefault: "8-10",
+        loadDefault: "20 kg / main",
+        restSec: 90,
+        reglage: "Dossier du banc quasi vertical (80-85°), pieds bien à plat.",
+        execution: "Pousse les haltères au-dessus de la tête sans cambrer les lombaires, descends à hauteur d'oreilles.",
+        videoUrl: "https://www.youtube.com/results?search_query=developpe+militaire+halteres+assis"
+      },
+      {
+        id: "ex-15",
+        nom: "Élévations latérales à la poulie basse",
+        groupe: "Épaules",
+        machine: "Poulie vis-à-vis",
+        setsDefault: 4,
+        repsDefault: "12-15",
+        loadDefault: "7.5 kg",
+        restSec: 60,
+        reglage: "Poulie réglée tout en bas avec poignée simple.",
+        execution: "Monte le bras sur le côté jusqu'à l'horizontale, coude légèrement fléchi, descente freinée.",
+        videoUrl: "https://www.youtube.com/results?search_query=elevations+laterales+poulie+basse"
+      },
+      {
+        id: "ex-16",
+        nom: "Développé épaules à la Smith Machine",
+        groupe: "Épaules",
+        machine: "Smith Machine",
+        setsDefault: 3,
+        repsDefault: "10",
+        loadDefault: "45 kg",
+        restSec: 90,
+        reglage: "Banc réglé à 85° centré sous la barre guidée.",
+        execution: "Descends la barre jusqu'au menton puis pousse verticalement en gardant les abdos gainés.",
+        videoUrl: "https://www.youtube.com/results?search_query=developpe+epaules+smith+machine"
+      },
+
+      // BRAS (4)
+      {
+        id: "ex-17",
+        nom: "Curl biceps à la poulie basse",
+        groupe: "Bras",
+        machine: "Poulie vis-à-vis",
+        setsDefault: 3,
+        repsDefault: "12-15",
+        loadDefault: "25 kg",
+        restSec: 60,
+        reglage: "Poulie basse avec barre droite courte ou corde.",
+        execution: "Coudes collés aux flancs, fléchis les avant-bras sans balancer les épaules.",
+        videoUrl: "https://www.youtube.com/results?search_query=curl+biceps+poulie+basse"
+      },
+      {
+        id: "ex-18",
+        nom: "Curl incliné aux haltères",
+        groupe: "Bras",
+        machine: "Haltères & Banc",
+        setsDefault: 3,
+        repsDefault: "10-12",
+        loadDefault: "14 kg / main",
+        restSec: 60,
+        reglage: "Banc incliné à 45-60°, bras pendants vers le sol.",
+        execution: "Garde les coudes fixes en arrière du buste pour étirer le chef long du biceps.",
+        videoUrl: "https://www.youtube.com/results?search_query=curl+incline+halteres+biceps"
+      },
+      {
+        id: "ex-19",
+        nom: "Extension triceps corde poulie haute",
+        groupe: "Bras",
+        machine: "Poulie vis-à-vis",
+        setsDefault: 4,
+        repsDefault: "12-15",
+        loadDefault: "22 kg",
+        restSec: 60,
+        reglage: "Poulie tout en haut avec corde double, buste légèrement penché.",
+        execution: "Verrouille les coudes le long du corps et écarte la corde en bas du mouvement.",
+        videoUrl: "https://www.youtube.com/results?search_query=extension+triceps+corde+poulie+haute"
+      },
+      {
+        id: "ex-20",
+        nom: "Dips sur barres parallèles",
+        groupe: "Bras",
+        machine: "Poids du corps / Barre fixe",
+        setsDefault: 3,
+        repsDefault: "8-12",
+        loadDefault: "Poids du corps",
+        restSec: 90,
+        reglage: "Station à dips stable, buste droit pour cibler les triceps.",
+        execution: "Descends jusqu'à ce que les bras soient parallèles au sol puis pousse jusqu'à extension.",
+        videoUrl: "https://www.youtube.com/results?search_query=dips+triceps+technique"
+      },
+
+      // ABDOS (2)
+      {
+        id: "ex-21",
+        nom: "Crunch à la poulie haute",
+        groupe: "Abdos",
+        machine: "Poulie vis-à-vis",
+        setsDefault: 4,
+        repsDefault: "15-20",
+        loadDefault: "30 kg",
+        restSec: 60,
+        reglage: "À genoux face à la poulie haute, corde tenue près des tempes.",
+        execution: "Enroule la colonne vertébrale en expirant fort sans tirer avec les bras.",
+        videoUrl: "https://www.youtube.com/results?search_query=crunch+poulie+haute+abdos"
+      },
+      {
+        id: "ex-22",
+        nom: "Relevés de jambes suspendus",
+        groupe: "Abdos",
+        machine: "Poids du corps / Barre fixe",
+        setsDefault: 3,
+        repsDefault: "12-15",
+        loadDefault: "Poids du corps",
+        restSec: 60,
+        reglage: "Suspendu à la barre fixe, prise ferme largeur d'épaules.",
+        execution: "Rétroverse le bassin et monte les genoux ou jambes tendues sans élan.",
+        videoUrl: "https://www.youtube.com/results?search_query=releves+de+jambes+suspendus+barre"
+      },
+
+      // CARDIO (2)
+      {
+        id: "ex-23",
+        nom: "Fractionné HIIT sur Rameur",
+        groupe: "Cardio",
+        machine: "Tapis de course / Rameur",
+        setsDefault: 6,
+        repsDefault: "45s sprint / 45s lent",
+        loadDefault: "Résistance 6-7",
+        restSec: 45,
+        reglage: "Sangles ajustées au milieu des pieds, résistance réglée sur 6-7.",
+        execution: "Pousse d'abord avec les jambes, incline légèrement le buste puis tire la poignée au sternum.",
+        videoUrl: "https://www.youtube.com/results?search_query=rameur+technique+fractionne"
+      },
+      {
+        id: "ex-24",
+        nom: "Marche inclinée active sur Tapis",
+        groupe: "Cardio",
+        machine: "Tapis de course / Rameur",
+        setsDefault: 1,
+        repsDefault: "20 minutes",
+        loadDefault: "Pente 10% • 5.5 km/h",
+        restSec: 60,
+        reglage: "Inclinaison réglée entre 8 % et 12 %, vitesse 5.2 à 6.0 km/h.",
+        execution: "Marche active sans t'appuyer sur les poignées latérales, respiration régulière.",
+        videoUrl: "https://www.youtube.com/results?search_query=marche+inclinee+tapis+cardio"
+      }
+    ];
+
+    const DEFAULT_ATHLETES = [
+      {
+        id: "ath-lucas",
+        nom: "Lucas Moreau",
+        code: "LUCAS-2026",
+        objectif: "Prise de masse propre",
+        salleId: "gym-baule",
+        statut: "Actif",
+        poidsActuel: 78.4,
+        tourTaille: 81.0,
+        caloriesCibles: 2850,
+        proteinesCibles: 175,
+        seanceTitre: "Haut du Corps — Force & Hypertrophie",
+        seanceJour: "Jeudi • 18h00",
+        seanceNotes: "Garde 1 à 2 répétitions en réserve sur le développé couché et respecte bien les 2 min de repos.",
+        exercices: [
+          { exId: "ex-01", series: 4, reps: "8-10", charge: "80 kg", reposSec: 120, faites: [true, true, false, false] },
+          { exId: "ex-05", series: 4, reps: "10-12", charge: "60 kg", reposSec: 90, faites: [false, false, false, false] },
+          { exId: "ex-15", series: 4, reps: "12-15", charge: "7.5 kg", reposSec: 60, faites: [false, false, false, false] },
+          { exId: "ex-19", series: 3, reps: "12-15", charge: "25 kg", reposSec: 60, faites: [false, false, false] }
+        ]
+      },
+      {
+        id: "ath-chloe",
+        nom: "Chloé Laurent",
+        code: "CHLOE-2026",
+        objectif: "Tonicité & Bas du corps",
+        salleId: "gym-guerande",
+        statut: "Actif",
+        poidsActuel: 61.2,
+        tourTaille: 68.5,
+        caloriesCibles: 2050,
+        proteinesCibles: 130,
+        seanceTitre: "Bas du Corps — Presse & Guidé",
+        seanceJour: "Vendredi • 12h30",
+        seanceNotes: "Descente contrôlée sur la presse à cuisses et 1s de pause en contraction sur le leg curl.",
+        exercices: [
+          { exId: "ex-10", series: 4, reps: "10-12", charge: "120 kg", reposSec: 120, faites: [true, false, false, false] },
+          { exId: "ex-12", series: 3, reps: "10-12", charge: "50 kg", reposSec: 90, faites: [false, false, false] },
+          { exId: "ex-13", series: 3, reps: "12-15", charge: "35 kg", reposSec: 75, faites: [false, false, false] },
+          { exId: "ex-24", series: 1, reps: "20 minutes", charge: "Pente 10% • 5.5 km/h", reposSec: 60, faites: [false] }
+        ]
+      },
+      {
+        id: "ath-max",
+        nom: "Maxime Bernard",
+        code: "MAX-2026",
+        objectif: "Remise en forme & Cardio",
+        salleId: "gym-home",
+        statut: "Actif",
+        poidsActuel: 84.5,
+        tourTaille: 89.0,
+        caloriesCibles: 2250,
+        proteinesCibles: 160,
+        seanceTitre: "Full Body — Home Studio",
+        seanceJour: "Samedi • 10h00",
+        seanceNotes: "Séance 100 % adaptée à ton matériel Home Studio (haltères, banc, barre fixe, rameur).",
+        exercices: [
+          { exId: "ex-02", series: 4, reps: "10-12", charge: "22 kg / main", reposSec: 90, faites: [false, false, false, false] },
+          { exId: "ex-07", series: 3, reps: "12 / côté", charge: "24 kg", reposSec: 75, faites: [false, false, false] },
+          { exId: "ex-14", series: 3, reps: "10", charge: "16 kg / main", reposSec: 90, faites: [false, false, false] },
+          { exId: "ex-23", series: 6, reps: "45s sprint / 45s lent", charge: "Résistance 6", reposSec: 45, faites: [false, false, false, false, false, false] }
+        ]
+      }
+    ];
+
+    const DEFAULT_CHECKINS = [
+      {
+        id: "chk-1",
+        athleteId: "ath-lucas",
+        date: "2026-11-24",
+        poids: 78.4,
+        tourTaille: 81.0,
+        energie: 9,
+        nutritionPct: 95,
+        commentaire: "Super congestions sur le haut du corps, charges en hausse sur le développé couché."
+      },
+      {
+        id: "chk-2",
+        athleteId: "ath-chloe",
+        date: "2026-11-23",
+        poids: 61.2,
+        tourTaille: 68.5,
+        energie: 8,
+        nutritionPct: 90,
+        commentaire: "Très bonnes sensations à Basic-Fit Guérande, zéro douleur aux genoux."
+      },
+      {
+        id: "chk-3",
+        athleteId: "ath-max",
+        date: "2026-11-22",
+        poids: 84.5,
+        tourTaille: 89.0,
+        energie: 8,
+        nutritionPct: 88,
+        commentaire: "Le fractionné sur rameur passe beaucoup mieux qu'il y a deux semaines."
+      },
+      {
+        id: "chk-4",
+        athleteId: "ath-lucas",
+        date: "2026-11-17",
+        poids: 78.1,
+        tourTaille: 81.2,
+        energie: 8,
+        nutritionPct: 92,
+        commentaire: "Sommeil réparateur (8h), prêt pour le prochain bloc."
+      }
+    ];
+
+    // =========================================================================
+    // 3. INITIALISATION DES DONNÉES & ÉTAT GLOBAL
+    // =========================================================================
+    function loadInitialArray(storageKey, fallbackArray) {
+      const raw = safeGetStorage(storageKey);
+      if (!raw) return JSON.parse(JSON.stringify(fallbackArray));
       try {
-        const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.athletes) && parsed.athletes.length > 0) {
-            return parsed;
-          }
-        }
-      } catch (err) {
-        console.warn("LocalStorage lecture impossible :", err);
-      }
-      return structuredClone(DEFAULT_STATE);
-    }
-
-    function saveLocalState(nextState) {
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(nextState));
-      } catch (err) {
-        console.warn("LocalStorage écriture impossible :", err);
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) && parsed.length > 0 ? parsed : JSON.parse(JSON.stringify(fallbackArray));
+      } catch (e) {
+        return JSON.parse(JSON.stringify(fallbackArray));
       }
     }
 
-    async function persistState(nextState) {
-      appState = nextState;
-      saveLocalState(nextState);
-      render();
+    let gyms = loadInitialArray(STORAGE_KEYS.GYMS, DEFAULT_GYMS);
+    let exercisesCatalog = loadInitialArray(STORAGE_KEYS.EXERCISES, DEFAULT_EXERCISES);
+    let athletes = loadInitialArray(STORAGE_KEYS.ATHLETES, DEFAULT_ATHLETES);
+    let checkins = loadInitialArray(STORAGE_KEYS.CHECKINS, DEFAULT_CHECKINS);
 
-      if (db) {
-        try {
-          const docRef = doc(db, FIRESTORE_DOC_PATH[0], FIRESTORE_DOC_PATH[1]);
-          await setDoc(docRef, {
-            athletes: nextState.athletes,
-            updatedAt: new Date().toISOString()
-          }, { merge: true });
-          if (!firestoreConnected) {
-            firestoreConnected = true;
-            updateConnectionBadge();
-          }
-        } catch (err) {
-          console.warn("Écriture Firestore en attente / indisponible, repli local actif :", err.message);
-        }
-      }
-    }
-
-    function initFirebaseSync() {
-      try {
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        const docRef = doc(db, FIRESTORE_DOC_PATH[0], FIRESTORE_DOC_PATH[1]);
-
-        // Seed initial document if collection/doc doesn't exist yet
-        getDoc(docRef).then((snap) => {
-          if (!snap.exists()) {
-            setDoc(docRef, {
-              athletes: appState.athletes,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            }).catch((err) => console.warn("Initialisation document Firestore :", err.message));
-          }
-        }).catch((err) => console.warn("Lecture initiale Firestore :", err.message));
-
-        // Real-time listener
-        unsubscribeSnapshot = onSnapshot(
-          docRef,
-          (snapshot) => {
-            firestoreConnected = true;
-            updateConnectionBadge();
-            if (snapshot.exists()) {
-              const data = snapshot.data();
-              if (Array.isArray(data.athletes) && data.athletes.length > 0) {
-                appState = { ...appState, athletes: data.athletes };
-                saveLocalState(appState);
-                render();
-              }
-            }
-          },
-          (error) => {
-            console.warn("Firestore snapshot fallback (Mode Local) :", error.message);
-            firestoreConnected = false;
-            updateConnectionBadge();
-          }
-        );
-      } catch (err) {
-        console.warn("Firebase init error, Mode Local actif :", err.message);
-        firestoreConnected = false;
-        updateConnectionBadge();
-      }
-    }
-
-    function updateConnectionBadge() {
-      const badge = document.getElementById("connection-status-badge");
-      if (!badge) return;
-      if (firestoreConnected) {
-        badge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30";
-        badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-soft"></span>Firestore connecté • Temps réel actif`;
+    function ensureDefaultAccountsPresent() {
+      if (!Array.isArray(gyms) || gyms.length === 0) gyms = JSON.parse(JSON.stringify(DEFAULT_GYMS));
+      if (!Array.isArray(exercisesCatalog) || exercisesCatalog.length === 0) exercisesCatalog = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
+      if (!Array.isArray(athletes) || athletes.length === 0) {
+        athletes = JSON.parse(JSON.stringify(DEFAULT_ATHLETES));
       } else {
-        badge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-400/30";
-        badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-amber-400"></span>Mode Local`;
+        for (const defAth of DEFAULT_ATHLETES) {
+          if (!athletes.some((a) => (a.code || "").trim().toUpperCase() === defAth.code.toUpperCase())) {
+            athletes.push(JSON.parse(JSON.stringify(defAth)));
+          }
+        }
+      }
+      if (!Array.isArray(checkins) || checkins.length === 0) checkins = JSON.parse(JSON.stringify(DEFAULT_CHECKINS));
+    }
+
+    ensureDefaultAccountsPresent();
+
+    const state = {
+      role: null, // null | 'athlete' | 'coach'
+      loginTab: "athlete", // 'athlete' | 'coach'
+      loginFeedback: "",
+      loginFeedbackError: false,
+
+      athleteId: athletes[0]?.id || "ath-lucas",
+      athleteTab: "workout", // 'workout' | 'tracking'
+
+      coachTab: "athletes", // 'athletes' | 'builder' | 'catalog' | 'gyms' | 'tracking'
+      athleteSearch: "",
+      athleteGymFilter: "all",
+
+      builderAthleteId: athletes[0]?.id || "ath-lucas",
+      builderMuscleFilter: "Tous",
+      builderCompatibleOnly: true,
+      builderSearch: "",
+
+      catalogMuscleFilter: "Tous",
+      catalogMachineFilter: "Toutes",
+      catalogSearch: "",
+
+      selectedGymId: gyms[0]?.id || "gym-baule",
+      trackingFilterAthleteId: "all",
+
+      firestoreLive: false
+    };
+
+    let builderDraft = createDraftFromAthlete(state.builderAthleteId);
+
+    function createDraftFromAthlete(athleteId) {
+      const ath = athletes.find((a) => a.id === athleteId) || athletes[0];
+      if (!ath) return { athleteId: "", title: "", scheduledDay: "", notes: "", exercises: [] };
+      return {
+        athleteId: ath.id,
+        title: ath.seanceTitre || "Nouvelle séance personnalisée",
+        scheduledDay: ath.seanceJour || "Prochaine séance",
+        notes: ath.seanceNotes || "",
+        exercises: JSON.parse(JSON.stringify(ath.exercices || []))
+      };
+    }
+
+    // =========================================================================
+    // 4. ICÔNES SVG INTÉGRÉES (AUCUNE DÉPENDANCE EXTERNE REQUISE)
+    // =========================================================================
+    function svgIcon(name, cls = "w-4 h-4") {
+      const icons = {
+        users: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+        dumbbell: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>`,
+        book: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+        building: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>`,
+        activity: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
+        plus: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>`
+      };
+      return icons[name] || "";
+    }
+
+    // =========================================================================
+    // 5. UTILITAIRES & PERSISTANCE
+    // =========================================================================
+    function esc(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function getGym(gymId) {
+      return gyms.find((g) => g.id === gymId) || gyms[0] || { id: "none", nom: "Salle non définie", ville: "", machines: [] };
+    }
+
+    function getExerciseById(exId) {
+      return exercisesCatalog.find((e) => e.id === exId) || {
+        id: exId,
+        nom: "Exercice personnalisé",
+        groupe: "Général",
+        machine: "Haltères & Banc",
+        reglage: "Réglage standard.",
+        execution: "Exécution contrôlée.",
+        videoUrl: "https://www.youtube.com"
+      };
+    }
+
+    function isExerciseCompatible(ex, gym) {
+      if (!ex || !gym || !Array.isArray(gym.machines)) return false;
+      return gym.machines.includes(ex.machine);
+    }
+
+    function getWorkoutProgress(ath) {
+      if (!ath || !Array.isArray(ath.exercices) || ath.exercices.length === 0) return 0;
+      let total = 0;
+      let done = 0;
+      for (const item of ath.exercices) {
+        const count = Number(item.series) || 0;
+        total += count;
+        for (let i = 0; i < count; i++) {
+          if (item.faites && item.faites[i]) done++;
+        }
+      }
+      return total === 0 ? 0 : Math.round((done / total) * 100);
+    }
+
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+      const el = document.createElement("div");
+      const styles =
+        type === "warning"
+          ? "border-amber-500/50 bg-zinc-900/95 text-amber-200"
+          : type === "error"
+          ? "border-rose-500/50 bg-zinc-900/95 text-rose-200"
+          : "border-orange-500/50 bg-zinc-900/95 text-zinc-100";
+
+      el.className = `pointer-events-auto rounded-2xl border ${styles} px-4 py-3 shadow-2xl text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 transition-all`;
+      el.innerHTML = `<span>${esc(message)}</span><button type="button" onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-white font-bold">✕</button>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        if (el.parentElement) el.remove();
+      }, 3600);
+    }
+
+    function persistAllData(changedCollection = null, changedDoc = null) {
+      safeSetStorage(STORAGE_KEYS.GYMS, JSON.stringify(gyms));
+      safeSetStorage(STORAGE_KEYS.EXERCISES, JSON.stringify(exercisesCatalog));
+      safeSetStorage(STORAGE_KEYS.ATHLETES, JSON.stringify(athletes));
+      safeSetStorage(STORAGE_KEYS.CHECKINS, JSON.stringify(checkins));
+
+      if (window.firebaseSync && typeof window.firebaseSync.save === "function" && changedCollection && changedDoc && changedDoc.id) {
+        window.firebaseSync.save(changedCollection, changedDoc.id, changedDoc);
       }
     }
 
-    // -------------------------------------------------------------------------
-    // 3. AUDIO & FLOATING REST TIMER ENGINE
-    // -------------------------------------------------------------------------
+    // =========================================================================
+    // 6. CONNEXION & NAVIGATION
+    // =========================================================================
+    function setLoginFeedback(message = "", isError = true) {
+      state.loginFeedback = message;
+      state.loginFeedbackError = isError;
+      const box = document.getElementById("login-feedback-box");
+      if (box) {
+        if (!message) {
+          box.classList.add("hidden");
+          box.textContent = "";
+        } else {
+          box.classList.remove("hidden");
+          box.className = `rounded-xl px-3.5 py-2.5 text-xs font-bold border ${
+            isError
+              ? "bg-rose-500/15 border-rose-500/45 text-rose-200"
+              : "bg-emerald-500/15 border-emerald-500/45 text-emerald-200"
+          }`;
+          box.textContent = message;
+        }
+      }
+    }
+
+    window.setLoginTab = function(tab) {
+      state.loginTab = tab;
+      state.loginFeedback = "";
+      render();
+    };
+
+    window.loginWithAthleteCode = function(e) {
+      if (e) e.preventDefault();
+      ensureDefaultAccountsPresent();
+      const input = document.getElementById("athlete-code-input");
+      const rawCode = (input ? input.value : "").trim().toUpperCase();
+
+      if (!rawCode) {
+        setLoginFeedback("Saisis ton code personnel (ex : LUCAS-2026) ou utilise un bouton rapide ci-dessous.", true);
+        showToast("Saisis un code athlète.", "error");
+        return false;
+      }
+
+      const found = athletes.find((a) => (a.code || "").trim().toUpperCase() === rawCode);
+      if (!found) {
+        setLoginFeedback(`Code « ${rawCode} » introuvable. Essaie LUCAS-2026, CHLOE-2026 ou MAX-2026.`, true);
+        showToast("Code athlète non reconnu.", "error");
+        return false;
+      }
+
+      state.loginFeedback = "";
+      state.role = "athlete";
+      state.athleteId = found.id;
+      state.athleteTab = "workout";
+      render();
+      showToast(`Bienvenue ${found.nom} !`);
+      return false;
+    };
+
+    window.quickLoginAthlete = function(athleteIdOrCode) {
+      ensureDefaultAccountsPresent();
+      const found =
+        athletes.find((a) => a.id === athleteIdOrCode) ||
+        athletes.find((a) => (a.code || "").trim().toUpperCase() === String(athleteIdOrCode).trim().toUpperCase()) ||
+        athletes[0];
+
+      if (!found) return;
+      state.loginFeedback = "";
+      state.role = "athlete";
+      state.athleteId = found.id;
+      state.athleteTab = "workout";
+      render();
+      showToast(`Connecté en tant que ${found.nom}`);
+    };
+
+    window.loginCoach = function(e) {
+      if (e) e.preventDefault();
+      ensureDefaultAccountsPresent();
+      const email = (document.getElementById("coach-email-input")?.value || "").trim().toLowerCase();
+      const pass = (document.getElementById("coach-pass-input")?.value || "").trim();
+
+      if (email === "coach@btraining.fr" && pass === "admin") {
+        state.loginFeedback = "";
+        state.role = "coach";
+        state.coachTab = "athletes";
+        render();
+        showToast("Espace Coach ouvert !");
+        return false;
+      }
+
+      setLoginFeedback("Identifiants incorrects. Utilise coach@btraining.fr et le mot de passe admin (ou le bouton 1 clic).", true);
+      showToast("Identifiants Coach incorrects.", "error");
+      return false;
+    };
+
+    window.quickLoginCoach = function() {
+      ensureDefaultAccountsPresent();
+      state.loginFeedback = "";
+      state.role = "coach";
+      state.coachTab = "athletes";
+      render();
+      showToast("Accès rapide Espace Coach activé !");
+    };
+
+    window.logoutApp = function() {
+      stopRestTimer();
+      state.role = null;
+      state.loginFeedback = "";
+      render();
+    };
+
+    window.setCoachTab = function(tab) {
+      state.coachTab = tab;
+      if (tab === "builder") {
+        builderDraft = createDraftFromAthlete(state.builderAthleteId);
+      }
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.setAthleteTab = function(tab) {
+      state.athleteTab = tab;
+      render();
+    };
+
+    // =========================================================================
+    // 7. ACTIONS COACH : ATHLÈTES, SÉANCES, CATALOGUE, SALLES, SUIVI
+    // =========================================================================
+    window.setAthleteSearch = function(val) {
+      state.athleteSearch = val;
+      render();
+    };
+
+    window.setAthleteGymFilter = function(gymId) {
+      state.athleteGymFilter = gymId;
+      render();
+    };
+
+    window.assignAthleteGym = function(athleteId, gymId) {
+      const ath = athletes.find((a) => a.id === athleteId);
+      if (!ath) return;
+      ath.salleId = gymId;
+      const gym = getGym(gymId);
+      persistAllData("athletes", ath);
+      render();
+      showToast(`${ath.nom} rattaché(e) à ${gym.nom}.`);
+    };
+
+    window.copyAccessCode = function(code, e) {
+      if (e) e.stopPropagation();
+      try {
+        const temp = document.createElement("textarea");
+        temp.value = code;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        showToast(`Code ${code} copié !`);
+      } catch (err) {
+        showToast(`Code : ${code}`);
+      }
+    };
+
+    window.jumpToBuilder = function(athleteId, e) {
+      if (e) e.stopPropagation();
+      state.builderAthleteId = athleteId;
+      builderDraft = createDraftFromAthlete(athleteId);
+      state.coachTab = "builder";
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.jumpToTracking = function(athleteId, e) {
+      if (e) e.stopPropagation();
+      state.trackingFilterAthleteId = athleteId;
+      state.coachTab = "tracking";
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.selectBuilderAthlete = function(athleteId) {
+      state.builderAthleteId = athleteId;
+      builderDraft = createDraftFromAthlete(athleteId);
+      render();
+    };
+
+    window.setBuilderMuscleFilter = function(grp) {
+      state.builderMuscleFilter = grp;
+      render();
+    };
+
+    window.toggleBuilderCompatibleOnly = function(checked) {
+      state.builderCompatibleOnly = checked;
+      render();
+    };
+
+    window.setBuilderSearch = function(val) {
+      state.builderSearch = val;
+      render();
+    };
+
+    window.setBuilderField = function(field, value) {
+      builderDraft[field] = value;
+    };
+
+    window.addExerciseToDraft = function(exId) {
+      const ex = getExerciseById(exId);
+      builderDraft.exercises.push({
+        exId: ex.id,
+        series: ex.setsDefault || 3,
+        reps: ex.repsDefault || "10-12",
+        charge: ex.loadDefault || "Modérée",
+        reposSec: ex.restSec || 90,
+        faites: Array(ex.setsDefault || 3).fill(false)
+      });
+      render();
+      showToast(`« ${ex.nom} » ajouté à la séance.`);
+    };
+
+    window.removeDraftExercise = function(index) {
+      builderDraft.exercises.splice(index, 1);
+      render();
+    };
+
+    window.updateDraftExercise = function(index, field, value) {
+      const item = builderDraft.exercises[index];
+      if (!item) return;
+      if (field === "series" || field === "reposSec") {
+        const num = Math.max(1, parseInt(value, 10) || 1);
+        item[field] = num;
+        if (field === "series") {
+          item.faites = Array(num).fill(false);
+        }
+      } else {
+        item[field] = value;
+      }
+      render();
+    };
+
+    window.composeCompatibleWorkout = function() {
+      const ath = athletes.find((a) => a.id === builderDraft.athleteId);
+      if (!ath) return;
+      const gym = getGym(ath.salleId);
+      const compatibles = exercisesCatalog.filter((ex) => isExerciseCompatible(ex, gym));
+
+      if (compatibles.length === 0) {
+        showToast("Aucune machine cochée dans cette salle ! Configure d'abord la salle.", "warning");
+        return;
+      }
+
+      const picked = [];
+      const usedGroups = new Set();
+      for (const ex of compatibles) {
+        if (!usedGroups.has(ex.groupe) && picked.length < 5) {
+          picked.push(ex);
+          usedGroups.add(ex.groupe);
+        }
+      }
+      for (const ex of compatibles) {
+        if (picked.length < 5 && !picked.some((p) => p.id === ex.id)) {
+          picked.push(ex);
+        }
+      }
+
+      builderDraft.title = `Séance Sur-Mesure • ${gym.nom}`;
+      builderDraft.notes = `Programme 100 % compatible avec les machines de ${gym.nom}.`;
+      builderDraft.exercises = picked.map((ex) => ({
+        exId: ex.id,
+        series: ex.setsDefault || 3,
+        reps: ex.repsDefault || "10-12",
+        charge: ex.loadDefault || "Adaptée",
+        reposSec: ex.restSec || 90,
+        faites: Array(ex.setsDefault || 3).fill(false)
+      }));
+
+      render();
+      showToast(`Séance de ${picked.length} exercices générée pour ${gym.nom} !`);
+    };
+
+    window.publishDraftWorkout = function(e) {
+      if (e) e.preventDefault();
+      const ath = athletes.find((a) => a.id === builderDraft.athleteId);
+      if (!ath) return;
+      ath.seanceTitre = builderDraft.title.trim() || "Séance personnalisée";
+      ath.seanceJour = builderDraft.scheduledDay.trim() || "Prochaine séance";
+      ath.seanceNotes = builderDraft.notes.trim();
+      ath.exercices = JSON.parse(JSON.stringify(builderDraft.exercises));
+
+      persistAllData("athletes", ath);
+      render();
+      showToast(`Séance publiée en direct pour ${ath.nom} !`);
+    };
+
+    window.setCatalogMuscle = function(grp) {
+      state.catalogMuscleFilter = grp;
+      render();
+    };
+
+    window.setCatalogMachine = function(machine) {
+      state.catalogMachineFilter = machine;
+      render();
+    };
+
+    window.setCatalogSearch = function(val) {
+      state.catalogSearch = val;
+      render();
+    };
+
+    window.selectGymToEdit = function(gymId) {
+      state.selectedGymId = gymId;
+      render();
+    };
+
+    window.toggleGymMachine = function(gymId, machineName) {
+      const gym = gyms.find((g) => g.id === gymId);
+      if (!gym) return;
+      if (!Array.isArray(gym.machines)) gym.machines = [];
+      const idx = gym.machines.indexOf(machineName);
+      if (idx >= 0) {
+        gym.machines.splice(idx, 1);
+      } else {
+        gym.machines.push(machineName);
+      }
+      persistAllData("gyms", gym);
+      render();
+      showToast(`Équipement mis à jour pour ${gym.nom}.`);
+    };
+
+    window.setTrackingFilter = function(athleteId) {
+      state.trackingFilterAthleteId = athleteId;
+      render();
+    };
+
+    // =========================================================================
+    // 8. CHRONOMÈTRE DE REPOS AUTOMATIQUE & ACTIONS ATHLÈTE
+    // =========================================================================
+    let restInterval = null;
+    let restTotal = 90;
+    let restRemaining = 90;
+
     function playTimerBeep() {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -394,107 +1158,138 @@
         const gain = ctx.createGain();
         osc.type = "sine";
         osc.frequency.setValueAtTime(880, ctx.currentTime);
-        gain.gain.setValueAtTime(0.14, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + 0.45);
-      } catch (_) {
-        // Ignore audio autoplay blocks on restricted browsers
-      }
+        osc.stop(ctx.currentTime + 0.35);
+      } catch (e) {}
     }
 
     function formatSeconds(sec) {
-      const safe = Math.max(0, Math.floor(sec));
-      const m = Math.floor(safe / 60).toString().padStart(2, "0");
-      const s = (safe % 60).toString().padStart(2, "0");
-      return `${m}:${s}`;
+      const s = Math.max(0, Math.floor(sec));
+      const m = String(Math.floor(s / 60)).padStart(2, "0");
+      const r = String(s % 60).padStart(2, "0");
+      return `${m}:${r}`;
     }
 
-    window.startRestTimer = function(seconds, labelText = "Série validée • Récupération") {
-      const duration = Number(seconds) > 0 ? Number(seconds) : 90;
-      timerTotal = duration;
-      timerRemaining = duration;
-
-      const widget = document.getElementById("rest-timer-widget");
-      const contextEl = document.getElementById("timer-context");
-      if (contextEl) contextEl.textContent = labelText;
-      if (widget) widget.classList.remove("hidden");
-
-      updateTimerUI();
-      if (timerInterval) clearInterval(timerInterval);
-
-      timerInterval = setInterval(() => {
-        timerRemaining -= 1;
-        updateTimerUI();
-        if (timerRemaining <= 0) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-          playTimerBeep();
-          showToast("Temps de repos terminé — Prochaine série !", "success");
-          setTimeout(() => {
-            if (timerRemaining <= 0) {
-              document.getElementById("rest-timer-widget")?.classList.add("hidden");
-            }
-          }, 1800);
-        }
-      }, 1000);
-    };
-
-    function updateTimerUI() {
-      const countEl = document.getElementById("timer-countdown");
+    function updateRestTimerUI() {
+      const countdownEl = document.getElementById("timer-countdown");
       const barEl = document.getElementById("timer-progress-bar");
-      if (countEl) countEl.textContent = formatSeconds(timerRemaining);
-      if (barEl && timerTotal > 0) {
-        const pct = Math.max(0, Math.min(100, (timerRemaining / timerTotal) * 100));
+      if (countdownEl) countdownEl.textContent = formatSeconds(restRemaining);
+      if (barEl) {
+        const pct = restTotal > 0 ? Math.max(0, Math.min(100, (restRemaining / restTotal) * 100)) : 0;
         barEl.style.width = `${pct}%`;
       }
     }
 
-    window.adjustRestTimer = function(deltaSec) {
-      timerRemaining = Math.max(5, timerRemaining + deltaSec);
-      if (timerRemaining > timerTotal) timerTotal = timerRemaining;
-      updateTimerUI();
+    window.startRestTimer = function(seconds, contextText) {
+      stopRestTimer(true);
+      restTotal = Math.max(10, Number(seconds) || 90);
+      restRemaining = restTotal;
+
+      const widget = document.getElementById("rest-timer-widget");
+      const ctxEl = document.getElementById("timer-context");
+      if (ctxEl) ctxEl.textContent = contextText || "Série validée • Récupération";
+      if (widget) widget.classList.remove("hidden");
+      updateRestTimerUI();
+
+      restInterval = setInterval(() => {
+        restRemaining -= 1;
+        updateRestTimerUI();
+        if (restRemaining <= 0) {
+          stopRestTimer();
+          playTimerBeep();
+          showToast("Repos terminé ! C'est parti pour la série suivante.");
+        }
+      }, 1000);
     };
 
-    window.stopRestTimer = function() {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = null;
-      timerRemaining = 0;
-      document.getElementById("rest-timer-widget")?.classList.add("hidden");
+    window.adjustRestTimer = function(delta) {
+      restRemaining = Math.max(5, restRemaining + delta);
+      if (restRemaining > restTotal) restTotal = restRemaining;
+      updateRestTimerUI();
     };
 
-    // -------------------------------------------------------------------------
-    // 4. TOAST & MODAL HELPERS
-    // -------------------------------------------------------------------------
-    function showToast(message, type = "info") {
-      const container = document.getElementById("toast-container");
-      if (!container) return;
-      const styles = {
-        success: "bg-emerald-950/95 border-emerald-400/40 text-emerald-200",
-        error: "bg-rose-950/95 border-rose-400/40 text-rose-200",
-        info: "bg-slate-900/95 border-sky-400/40 text-sky-100"
+    window.stopRestTimer = function(silent = false) {
+      if (restInterval) {
+        clearInterval(restInterval);
+        restInterval = null;
+      }
+      const widget = document.getElementById("rest-timer-widget");
+      if (widget && !silent) widget.classList.add("hidden");
+    };
+
+    window.toggleAthleteSet = function(athleteId, exIndex, setIndex) {
+      const ath = athletes.find((a) => a.id === athleteId);
+      if (!ath || !ath.exercices[exIndex]) return;
+      const item = ath.exercices[exIndex];
+      if (!Array.isArray(item.faites)) item.faites = Array(item.series).fill(false);
+
+      const nextVal = !item.faites[setIndex];
+      item.faites[setIndex] = nextVal;
+      persistAllData("athletes", ath);
+      render();
+
+      if (nextVal) {
+        const ex = getExerciseById(item.exId);
+        startRestTimer(item.reposSec || 90, `${ex.nom} • Série ${setIndex + 1}/${item.series}`);
+      }
+    };
+
+    window.updateAthleteSetLoad = function(athleteId, exIndex, newLoad) {
+      const ath = athletes.find((a) => a.id === athleteId);
+      if (!ath || !ath.exercices[exIndex]) return;
+      ath.exercices[exIndex].charge = newLoad;
+      persistAllData("athletes", ath);
+      showToast("Charge mise à jour et synchronisée.");
+    };
+
+    window.submitAthleteCheckin = function(e, athleteId) {
+      if (e) e.preventDefault();
+      const ath = athletes.find((a) => a.id === athleteId);
+      if (!ath) return;
+
+      const poids = parseFloat(document.getElementById("chk-poids")?.value) || ath.poidsActuel;
+      const tourTaille = parseFloat(document.getElementById("chk-taille")?.value) || ath.tourTaille;
+      const energie = Math.min(10, Math.max(1, parseInt(document.getElementById("chk-energie")?.value, 10) || 8));
+      const nutritionPct = Math.min(100, Math.max(0, parseInt(document.getElementById("chk-nutri")?.value, 10) || 90));
+      const commentaire = (document.getElementById("chk-comment")?.value || "").trim();
+
+      const today = new Date().toISOString().slice(0, 10);
+      const newCheckin = {
+        id: "chk-" + Date.now(),
+        athleteId: ath.id,
+        date: today,
+        poids,
+        tourTaille,
+        energie,
+        nutritionPct,
+        commentaire: commentaire || "Bilan transmis depuis l'application."
       };
-      const el = document.createElement("div");
-      el.className = `pointer-events-auto border rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl transition ${styles[type] || styles.info}`;
-      el.textContent = message;
-      container.appendChild(el);
-      setTimeout(() => {
-        el.style.opacity = "0";
-        el.style.transform = "translateY(-6px)";
-        setTimeout(() => el.remove(), 250);
-      }, 3200);
-    }
 
-    function openModal(htmlContent) {
+      ath.poidsActuel = poids;
+      ath.tourTaille = tourTaille;
+      checkins.unshift(newCheckin);
+
+      persistAllData("athletes", ath);
+      persistAllData("checkins", newCheckin);
+      render();
+      showToast("Bilan envoyé au coach en temps réel !");
+    };
+
+    // =========================================================================
+    // 9. MODALES INTERACTIVES
+    // =========================================================================
+    window.openModal = function(htmlContent) {
       const backdrop = document.getElementById("modal-backdrop");
       const card = document.getElementById("modal-card");
       if (!backdrop || !card) return;
       card.innerHTML = htmlContent;
       backdrop.classList.remove("hidden");
       backdrop.classList.add("flex");
-    }
+    };
 
     window.closeModal = function() {
       const backdrop = document.getElementById("modal-backdrop");
@@ -503,337 +1298,391 @@
       backdrop.classList.remove("flex");
     };
 
-    document.getElementById("modal-backdrop")?.addEventListener("click", (e) => {
-      if (e.target.id === "modal-backdrop") closeModal();
-    });
-
-    // -------------------------------------------------------------------------
-    // 5. ATHLETE & COACH ACTIONS
-    // -------------------------------------------------------------------------
-    function getAthleteById(id) {
-      return appState.athletes.find((a) => a.id === id) || appState.athletes[0];
-    }
-
-    window.loginAthleteByCode = function(event) {
-      event.preventDefault();
-      const input = document.getElementById("athlete-code-input");
-      const rawCode = (input?.value || "").trim().toUpperCase();
-      const found = appState.athletes.find((a) => a.code.toUpperCase() === rawCode);
-      if (!found) {
-        showToast("Code athlète introuvable. Essaye LUCAS-2026 ou CHLOE-2026.", "error");
-        return;
-      }
-      session.role = "athlete";
-      session.athleteId = found.id;
-      session.athleteActiveTab = "workout";
-      showToast(`Bienvenue ${found.name} !`, "success");
-      render();
-    };
-
-    window.quickFillAthleteCode = function(code) {
-      const input = document.getElementById("athlete-code-input");
-      if (input) input.value = code;
-    };
-
-    window.loginCoach = function(event) {
-      event.preventDefault();
-      const email = (document.getElementById("coach-email-input")?.value || "").trim().toLowerCase();
-      const password = (document.getElementById("coach-password-input")?.value || "").trim();
-      if (email === "coach@btraining.fr" && password === "admin") {
-        session.role = "coach";
-        session.coachActiveTab = "athletes";
-        if (!session.selectedCoachAthleteId && appState.athletes[0]) {
-          session.selectedCoachAthleteId = appState.athletes[0].id;
-        }
-        showToast("Connexion Coach validée.", "success");
-        render();
-      } else {
-        showToast("Identifiants Coach invalides (coach@btraining.fr / admin).", "error");
-      }
-    };
-
-    window.logoutSession = function() {
-      stopRestTimer();
-      session.role = null;
-      session.athleteId = null;
-      render();
-    };
-
-    window.toggleAthleteSet = function(athleteId, workoutId, exerciseId, setIndex) {
-      const next = structuredClone(appState);
-      const ath = next.athletes.find((a) => a.id === athleteId);
+    window.openAthleteDetailModal = function(athleteId) {
+      const ath = athletes.find((a) => a.id === athleteId);
       if (!ath) return;
-      const wk = ath.workouts.find((w) => w.id === workoutId);
-      if (!wk) return;
-      const ex = wk.exercises.find((e) => e.id === exerciseId);
-      if (!ex) return;
+      const gym = getGym(ath.salleId);
+      const pct = getWorkoutProgress(ath);
+      const athCheckins = checkins.filter((c) => c.athleteId === ath.id);
 
-      if (!Array.isArray(ex.completedSets)) {
-        ex.completedSets = Array.from({ length: ex.setsCount }, () => false);
-      }
-
-      const willComplete = !ex.completedSets[setIndex];
-      ex.completedSets[setIndex] = willComplete;
-      persistState(next);
-
-      if (willComplete) {
-        const restDuration = ex.restSec || wk.restDefault || 90;
-        startRestTimer(restDuration, `${ex.name} • Série ${setIndex + 1}/${ex.setsCount} validée`);
-      }
-    };
-
-    window.updateLoggedLoad = function(athleteId, workoutId, exerciseId, setIndex, value) {
-      const next = structuredClone(appState);
-      const ath = next.athletes.find((a) => a.id === athleteId);
-      const wk = ath?.workouts.find((w) => w.id === workoutId);
-      const ex = wk?.exercises.find((e) => e.id === exerciseId);
-      if (!ex) return;
-      if (!Array.isArray(ex.loggedLoads)) ex.loggedLoads = [];
-      ex.loggedLoads[setIndex] = value;
-      saveLocalState(next);
-      appState = next;
-    };
-
-    window.commitLoggedLoads = function() {
-      persistState(appState);
-      showToast("Charges enregistrées et synchronisées.", "success");
-    };
-
-    window.openExerciseGuideModal = function(athleteId, workoutId, exerciseId) {
-      const ath = getAthleteById(athleteId);
-      const wk = ath?.workouts.find((w) => w.id === workoutId);
-      const ex = wk?.exercises.find((e) => e.id === exerciseId);
-      if (!ex) return;
-
-      const safeUrl = ex.videoUrl && /^https?:\/\//i.test(ex.videoUrl) ? ex.videoUrl : "";
       openModal(`
-        <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
-          <div>
-            <span class="text-xs font-semibold uppercase tracking-wider text-sky-400">Fiche Mouvement & Réglage Machine</span>
-            <h3 class="text-xl font-bold text-white mt-1">${escapeHtml(ex.name)}</h3>
-            <p class="text-xs text-slate-400 mt-0.5">${escapeHtml(ex.machine || "Équipement libre")}</p>
-          </div>
-          <button type="button" onclick="closeModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold">✕</button>
-        </div>
-
-        <div class="mt-4 space-y-4 text-sm">
-          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-            <h4 class="font-bold text-emerald-300 text-xs uppercase tracking-wider mb-1.5">Exécution technique</h4>
-            <p class="text-slate-200 leading-relaxed">${escapeHtml(ex.executionTip || "Maintenez un contrôle moteur complet sur chaque phase.")}</p>
-          </div>
-
-          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-            <h4 class="font-bold text-sky-300 text-xs uppercase tracking-wider mb-1.5">Réglage machine & sécurité</h4>
-            <p class="text-slate-200 leading-relaxed">${escapeHtml(ex.machineTip || "Ajustez la hauteur et les butées avant de charger.")}</p>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-            <div class="text-xs text-slate-400">
-              Cible : <strong class="text-slate-200">${ex.setsCount} × ${escapeHtml(ex.repsTarget)}</strong> • Charge repère : <strong class="text-sky-300">${escapeHtml(ex.loadHint || "—")}</strong>
+        <div class="space-y-5">
+          <div class="flex items-start justify-between gap-3 pb-3 border-b border-zinc-800">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-orange-400">Fiche Athlète</span>
+              <h2 class="text-xl font-black text-white mt-0.5">${esc(ath.nom)}</h2>
+              <p class="text-xs text-amber-300 font-semibold">${esc(ath.objectif)} • Code : <span class="font-mono">${esc(ath.code)}</span></p>
             </div>
-            ${safeUrl ? `
-              <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">
-                ▶ Voir vidéo de référence
-              </a>
-            ` : ""}
+            <button type="button" onclick="closeModal()" class="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300">✕</button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+              <span class="text-zinc-400 block">Salle attribuée</span>
+              <strong class="text-white font-bold mt-0.5 block">${esc(gym.nom)}</strong>
+            </div>
+            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+              <span class="text-zinc-400 block">Poids actuel</span>
+              <strong class="text-orange-300 font-extrabold text-sm mt-0.5 block">${ath.poidsActuel} kg</strong>
+            </div>
+            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+              <span class="text-zinc-400 block">Tour de taille</span>
+              <strong class="text-white font-extrabold text-sm mt-0.5 block">${ath.tourTaille} cm</strong>
+            </div>
+            <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+              <span class="text-zinc-400 block">Séance en cours</span>
+              <strong class="text-emerald-300 font-extrabold text-sm mt-0.5 block">${pct}%</strong>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Séance active : ${esc(ath.seanceTitre)}</h3>
+            <ul class="space-y-1.5 text-xs text-zinc-300">
+              ${(ath.exercices || []).map((item, i) => {
+                const ex = getExerciseById(item.exId);
+                return `<li class="flex justify-between gap-2 py-1 border-b border-zinc-900 last:border-0">
+                  <span><strong class="text-orange-400">#${i + 1}</strong> ${esc(ex.nom)}</span>
+                  <span class="text-zinc-400">${item.series}×${esc(item.reps)} • ${esc(item.charge)}</span>
+                </li>`;
+              }).join("")}
+            </ul>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-zinc-400">Derniers relevés (${athCheckins.length})</h3>
+            ${athCheckins.slice(0, 3).map((c) => `
+              <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs flex justify-between items-center gap-2">
+                <div>
+                  <strong class="text-white">${esc(c.date)}</strong> — <span class="text-orange-300 font-bold">${c.poids} kg</span> • Taille ${c.tourTaille} cm
+                  <p class="text-zinc-400 mt-0.5">${esc(c.commentaire)}</p>
+                </div>
+                <span class="px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 font-bold shrink-0">Énergie ${c.energie}/10</span>
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="flex flex-wrap justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal(); jumpToBuilder('${ath.id}')" class="px-4 py-2.5 rounded-xl btn-gradient font-extrabold text-xs">
+              Préparer sa prochaine séance
+            </button>
           </div>
         </div>
       `);
     };
 
-    window.addAthleteCheckin = function(event, athleteId) {
-      event.preventDefault();
-      const weightKg = parseFloat(document.getElementById("checkin-weight")?.value);
-      const bodyFatPct = parseFloat(document.getElementById("checkin-bf")?.value);
-      const sleepHours = parseFloat(document.getElementById("checkin-sleep")?.value);
-      const notes = (document.getElementById("checkin-notes")?.value || "").trim();
+    window.openNewAthleteModal = function() {
+      openModal(`
+        <form onsubmit="createNewAthlete(event)" class="space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+            <h2 class="text-lg font-black text-white">Ajouter un nouvel athlète</h2>
+            <button type="button" onclick="closeModal()" class="p-2 rounded-xl bg-zinc-800 text-zinc-300">✕</button>
+          </div>
 
-      const calories = parseInt(document.getElementById("nut-calories")?.value, 10);
-      const proteinG = parseInt(document.getElementById("nut-protein")?.value, 10);
-      const carbsG = parseInt(document.getElementById("nut-carbs")?.value, 10);
-      const fatsG = parseInt(document.getElementById("nut-fats")?.value, 10);
-      const waterL = parseFloat(document.getElementById("nut-water")?.value);
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Nom & Prénom</label>
+              <input id="new-ath-name" type="text" required placeholder="Ex : Thomas Garnier" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Code d'accès personnel</label>
+              <input id="new-ath-code" type="text" required placeholder="Ex : THOMAS-2026" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm font-mono uppercase text-orange-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Objectif principal</label>
+              <input id="new-ath-goal" type="text" required value="Hypertrophie & Force" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Salle de sport attribuée</label>
+              <select id="new-ath-gym" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm font-bold text-amber-300">
+                ${gyms.map((g) => `<option value="${g.id}">${esc(g.nom)}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Poids de départ (kg)</label>
+              <input id="new-ath-weight" type="number" step="0.1" value="75.0" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Calories cibles / jour</label>
+              <input id="new-ath-kcal" type="number" value="2500" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+          </div>
 
-      const next = structuredClone(appState);
-      const ath = next.athletes.find((a) => a.id === athleteId);
-      if (!ath) return;
-
-      const today = new Date().toISOString().slice(0, 10);
-      if (!Number.isNaN(weightKg)) {
-        ath.biometrics.push({
-          id: "bio_" + Date.now(),
-          date: today,
-          weightKg,
-          bodyFatPct: Number.isNaN(bodyFatPct) ? null : bodyFatPct,
-          sleepHours: Number.isNaN(sleepHours) ? 7.5 : sleepHours,
-          rhrBpm: 55,
-          notes: notes || "Check-in enregistré"
-        });
-      }
-
-      if (!Number.isNaN(calories) || !Number.isNaN(proteinG)) {
-        ath.nutritionLogs.push({
-          id: "nut_" + Date.now(),
-          date: today,
-          calories: Number.isNaN(calories) ? 2800 : calories,
-          proteinG: Number.isNaN(proteinG) ? 160 : proteinG,
-          carbsG: Number.isNaN(carbsG) ? 300 : carbsG,
-          fatsG: Number.isNaN(fatsG) ? 75 : fatsG,
-          waterL: Number.isNaN(waterL) ? 2.5 : waterL,
-          adherencePct: 95
-        });
-      }
-
-      persistState(next);
-      showToast("Check-in biométrique & nutritionnel enregistré !", "success");
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-zinc-800 text-xs font-bold text-zinc-300">Annuler</button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl btn-gradient font-extrabold text-xs">Créer l'athlète</button>
+          </div>
+        </form>
+      `);
     };
 
-    // Coach Management Actions
-    window.createAthleteProfile = function(event) {
-      event.preventDefault();
-      const name = (document.getElementById("new-ath-name")?.value || "").trim();
-      const code = (document.getElementById("new-ath-code")?.value || "").trim().toUpperCase();
-      const sport = (document.getElementById("new-ath-sport")?.value || "Préparation Physique").trim();
-      const objective = (document.getElementById("new-ath-obj")?.value || "Progression globale").trim();
+    window.createNewAthlete = function(e) {
+      e.preventDefault();
+      const nom = document.getElementById("new-ath-name").value.trim();
+      const code = document.getElementById("new-ath-code").value.trim().toUpperCase();
+      const objectif = document.getElementById("new-ath-goal").value.trim();
+      const salleId = document.getElementById("new-ath-gym").value;
+      const poidsActuel = parseFloat(document.getElementById("new-ath-weight").value) || 75;
+      const caloriesCibles = parseInt(document.getElementById("new-ath-kcal").value, 10) || 2500;
 
-      if (!name || !code) {
-        showToast("Nom et code d'accès athlète requis.", "error");
-        return;
-      }
-      if (appState.athletes.some((a) => a.code.toUpperCase() === code)) {
-        showToast("Ce code athlète existe déjà.", "error");
-        return;
-      }
-
-      const newAthlete = {
-        id: "ath_" + Date.now(),
+      if (!nom || !code) return;
+      const newAth = {
+        id: "ath-" + Date.now(),
+        nom,
         code,
-        name,
-        sport,
-        objective,
-        status: "Actif",
-        workouts: [
-          {
-            id: "wk_" + Date.now(),
-            title: "Séance Initiale — Fondamentaux",
-            focus: sport,
-            restDefault: 90,
-            exercises: []
-          }
-        ],
-        biometrics: [
-          { id: "bio_" + Date.now(), date: new Date().toISOString().slice(0, 10), weightKg: 70.0, bodyFatPct: 15.0, sleepHours: 7.5, rhrBpm: 58, notes: "Évaluation initiale" }
-        ],
-        nutritionLogs: [
-          { id: "nut_" + Date.now(), date: new Date().toISOString().slice(0, 10), calories: 2700, proteinG: 155, carbsG: 300, fatsG: 75, waterL: 2.5, adherencePct: 90 }
-        ],
-        nutritionTarget: { calories: 2750, proteinG: 160, carbsG: 310, fatsG: 75, waterL: 2.8 }
+        objectif,
+        salleId,
+        statut: "Actif",
+        poidsActuel,
+        tourTaille: 80,
+        caloriesCibles,
+        proteinesCibles: 160,
+        seanceTitre: "Séance Découverte",
+        seanceJour: "À planifier",
+        seanceNotes: "Bienvenue sur B training !",
+        exercices: []
       };
 
-      const next = structuredClone(appState);
-      next.athletes.push(newAthlete);
-      session.selectedCoachAthleteId = newAthlete.id;
-      persistState(next);
-      showToast(`Athlète ${name} (${code}) ajouté !`, "success");
+      athletes.push(newAth);
+      persistAllData("athletes", newAth);
+      closeModal();
+      render();
+      showToast(`Athlète ${nom} ajouté avec le code ${code}.`);
     };
 
-    window.assignExerciseToAthlete = function(event) {
-      event.preventDefault();
-      const athleteId = document.getElementById("assign-athlete-select")?.value;
-      const workoutTitle = (document.getElementById("assign-workout-title")?.value || "Séance Personnalisée").trim();
-      const name = (document.getElementById("assign-ex-name")?.value || "").trim();
-      const machine = (document.getElementById("assign-ex-machine")?.value || "Équipement standard").trim();
-      const setsCount = Math.max(1, Math.min(8, parseInt(document.getElementById("assign-ex-sets")?.value, 10) || 3));
-      const repsTarget = (document.getElementById("assign-ex-reps")?.value || "8-12 reps").trim();
-      const loadHint = (document.getElementById("assign-ex-load")?.value || "À calibrer").trim();
-      const restSec = Math.max(15, parseInt(document.getElementById("assign-ex-rest")?.value, 10) || 90);
-      const videoUrl = (document.getElementById("assign-ex-video")?.value || "").trim();
-      const executionTip = (document.getElementById("assign-ex-exec")?.value || "Contrôle de la charge sur toute l'amplitude.").trim();
-      const machineTip = (document.getElementById("assign-ex-machinetip")?.value || "Vérifier l'alignement articulaire avant de démarrer.").trim();
+    window.openNewGymModal = function() {
+      openModal(`
+        <form onsubmit="createNewGym(event)" class="space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+            <h2 class="text-lg font-black text-white">Ajouter une salle de sport</h2>
+            <button type="button" onclick="closeModal()" class="p-2 rounded-xl bg-zinc-800 text-zinc-300">✕</button>
+          </div>
 
-      if (!name) {
-        showToast("Indique le nom de l'exercice.", "error");
-        return;
-      }
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Nom de la salle</label>
+              <input id="new-gym-name" type="text" required placeholder="Ex : Fitness Park Saint-Nazaire" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Ville</label>
+              <input id="new-gym-city" type="text" required placeholder="Ex : Saint-Nazaire" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+          </div>
 
-      const next = structuredClone(appState);
-      const ath = next.athletes.find((a) => a.id === athleteId);
-      if (!ath) return;
+          <div>
+            <p class="text-xs font-bold text-amber-300 mb-2">Coche les machines présentes dans cette salle :</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+              ${MACHINES_REFERENTIEL.map((m, idx) => `
+                <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 cursor-pointer">
+                  <input type="checkbox" name="new-gym-machine" value="${esc(m)}" ${idx < 6 ? "checked" : ""} class="rounded border-zinc-600 text-orange-500" />
+                  <span>${esc(m)}</span>
+                </label>
+              `).join("")}
+            </div>
+          </div>
 
-      let wk = ath.workouts.find((w) => w.title.toLowerCase() === workoutTitle.toLowerCase());
-      if (!wk) {
-        wk = {
-          id: "wk_" + Date.now(),
-          title: workoutTitle,
-          focus: ath.sport,
-          restDefault: restSec,
-          exercises: []
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-zinc-800 text-xs font-bold text-zinc-300">Annuler</button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl btn-gradient font-extrabold text-xs">Enregistrer la salle</button>
+          </div>
+        </form>
+      `);
+    };
+
+    window.createNewGym = function(e) {
+      e.preventDefault();
+      const nom = document.getElementById("new-gym-name").value.trim();
+      const ville = document.getElementById("new-gym-city").value.trim();
+      const checked = Array.from(document.querySelectorAll('input[name="new-gym-machine"]:checked')).map((el) => el.value);
+
+      if (!nom) return;
+      const newGym = {
+        id: "gym-" + Date.now(),
+        nom,
+        ville,
+        machines: checked
+      };
+
+      gyms.push(newGym);
+      state.selectedGymId = newGym.id;
+      persistAllData("gyms", newGym);
+      closeModal();
+      render();
+      showToast(`Salle « ${nom} » ajoutée avec ${checked.length} machine(s).`);
+    };
+
+    window.openExerciseGuideModal = function(exId) {
+      const ex = getExerciseById(exId);
+      openModal(`
+        <div class="space-y-4">
+          <div class="flex items-start justify-between gap-3 pb-3 border-b border-zinc-800">
+            <div>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-500/15 text-orange-300 border border-orange-500/30">${esc(ex.groupe)}</span>
+              <h2 class="text-lg sm:text-xl font-black text-white mt-1.5">${esc(ex.nom)}</h2>
+              <p class="text-xs text-amber-300 font-semibold mt-0.5">Équipement : ${esc(ex.machine)}</p>
+            </div>
+            <button type="button" onclick="closeModal()" class="p-2 rounded-xl bg-zinc-800 text-zinc-300">✕</button>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-1.5">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-orange-400">1. Réglage de la machine & installation</h3>
+            <p class="text-xs sm:text-sm text-zinc-200 leading-relaxed">${esc(ex.reglage)}</p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-1.5">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">2. Exécution & tempo</h3>
+            <p class="text-xs sm:text-sm text-zinc-200 leading-relaxed">${esc(ex.execution)}</p>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <a href="${esc(ex.videoUrl || 'https://www.youtube.com')}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/40 text-xs font-extrabold text-orange-300">
+              <span>▶ Voir la démonstration vidéo</span>
+            </a>
+            <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl bg-zinc-800 text-xs font-bold text-white">Fermer</button>
+          </div>
+        </div>
+      `);
+    };
+
+    window.openExerciseEditorModal = function(exId = null) {
+      const existing = exId ? getExerciseById(exId) : null;
+      openModal(`
+        <form onsubmit="saveExerciseCatalogItem(event, '${existing ? existing.id : ""}')" class="space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+            <h2 class="text-lg font-black text-white">${existing ? "Modifier l'exercice" : "Ajouter un exercice au catalogue"}</h2>
+            <button type="button" onclick="closeModal()" class="p-2 rounded-xl bg-zinc-800 text-zinc-300">✕</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Nom de l'exercice</label>
+              <input id="ed-ex-nom" type="text" required value="${esc(existing?.nom || "")}" placeholder="Ex : Presse à cuisses unilatérale" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Groupe musculaire</label>
+              <select id="ed-ex-groupe" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white">
+                ${["Pectoraux", "Dos", "Jambes", "Épaules", "Bras", "Abdos", "Cardio"].map((g) => `<option value="${g}" ${existing?.groupe === g ? "selected" : ""}>${g}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Machine requise</label>
+              <select id="ed-ex-machine" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm font-bold text-amber-300">
+                ${MACHINES_REFERENTIEL.map((m) => `<option value="${esc(m)}" ${existing?.machine === m ? "selected" : ""}>${esc(m)}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Séries par défaut</label>
+              <input id="ed-ex-sets" type="number" min="1" max="10" value="${existing?.setsDefault || 4}" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Répétitions par défaut</label>
+              <input id="ed-ex-reps" type="text" value="${esc(existing?.repsDefault || "10-12")}" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Réglage machine</label>
+              <input id="ed-ex-reglage" type="text" value="${esc(existing?.reglage || "")}" placeholder="Hauteur du siège, position des pieds..." class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-zinc-400 mb-1">Consignes d'exécution</label>
+              <textarea id="ed-ex-exec" rows="2" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white">${esc(existing?.execution || "")}</textarea>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2.5 rounded-xl bg-zinc-800 text-xs font-bold text-zinc-300">Annuler</button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl btn-gradient font-extrabold text-xs">Enregistrer</button>
+          </div>
+        </form>
+      `);
+    };
+
+    window.saveExerciseCatalogItem = function(e, existingId) {
+      e.preventDefault();
+      const nom = document.getElementById("ed-ex-nom").value.trim();
+      const groupe = document.getElementById("ed-ex-groupe").value;
+      const machine = document.getElementById("ed-ex-machine").value;
+      const setsDefault = parseInt(document.getElementById("ed-ex-sets").value, 10) || 4;
+      const repsDefault = document.getElementById("ed-ex-reps").value.trim() || "10-12";
+      const reglage = document.getElementById("ed-ex-reglage").value.trim() || "Réglage adapté à la morphologie.";
+      const execution = document.getElementById("ed-ex-exec").value.trim() || "Mouvement fluide et contrôlé.";
+
+      if (!nom) return;
+
+      if (existingId) {
+        const idx = exercisesCatalog.findIndex((x) => x.id === existingId);
+        if (idx >= 0) {
+          exercisesCatalog[idx] = {
+            ...exercisesCatalog[idx],
+            nom,
+            groupe,
+            machine,
+            setsDefault,
+            repsDefault,
+            reglage,
+            execution
+          };
+          persistAllData("exercises", exercisesCatalog[idx]);
+          showToast(`Exercice « ${nom} » mis à jour.`);
+        }
+      } else {
+        const created = {
+          id: "ex-" + Date.now(),
+          nom,
+          groupe,
+          machine,
+          setsDefault,
+          repsDefault,
+          loadDefault: "Charge adaptée",
+          restSec: 90,
+          reglage,
+          execution,
+          videoUrl: "https://www.youtube.com/results?search_query=" + encodeURIComponent(nom + " musculation")
         };
-        ath.workouts.push(wk);
+        exercisesCatalog.unshift(created);
+        persistAllData("exercises", created);
+        showToast(`Nouvel exercice « ${nom} » ajouté.`);
       }
 
-      wk.exercises.push({
-        id: "ex_" + Date.now(),
-        name,
-        machine,
-        setsCount,
-        repsTarget,
-        loadHint,
-        restSec,
-        videoUrl,
-        executionTip,
-        machineTip,
-        completedSets: Array.from({ length: setsCount }, () => false),
-        loggedLoads: Array.from({ length: setsCount }, () => `${loadHint} x ?`)
-      });
-
-      persistState(next);
-      showToast(`Exercice "${name}" assigné à ${ath.name} !`, "success");
+      closeModal();
+      render();
     };
 
-    // -------------------------------------------------------------------------
-    // 6. RENDERERS (LOGIN, COACH DASHBOARD, ATHLETE DASHBOARD)
-    // -------------------------------------------------------------------------
-    function escapeHtml(str) {
-      return String(str ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
+    // =========================================================================
+    // 10. VUES DE RENDU HTML EN FRANÇAIS
+    // =========================================================================
+    function renderHeader() {
+      const badgeHtml = state.firestoreLive
+        ? `<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/35">
+             <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-dot"></span>
+             Firestore connecté • Temps réel actif
+           </span>`
+        : `<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/35">
+             <span class="h-2 w-2 rounded-full bg-amber-400"></span>
+             Mode Local • Données prêtes
+           </span>`;
 
-    function renderTopBar() {
-      const activeAthlete = session.role === "athlete" ? getAthleteById(session.athleteId) : null;
+      const currentAth = state.role === "athlete" ? athletes.find((a) => a.id === state.athleteId) : null;
+
       return `
-        <header class="border-b border-slate-800/90 bg-slate-950/80 backdrop-blur sticky top-0 z-20">
-          <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+        <header class="sticky top-0 z-20 bg-obsidian/95 backdrop-blur border-b border-zinc-800/90 px-4 py-3">
+          <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-              <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-400 to-emerald-400 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-sky-500/20">
+              <div class="h-10 w-10 rounded-2xl btn-gradient flex items-center justify-center font-black text-lg shadow-lg shadow-orange-500/25">
                 B
               </div>
               <div>
-                <div class="flex items-center gap-2.5 flex-wrap">
-                  <span class="font-extrabold tracking-tight text-white text-lg">B training</span>
-                  <span id="connection-status-badge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
-                    firestoreConnected
-                      ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/30"
-                      : "bg-amber-500/15 text-amber-300 border border-amber-400/30"
-                  }">
-                    <span class="h-2 w-2 rounded-full ${firestoreConnected ? "bg-emerald-400 animate-pulse-soft" : "bg-amber-400"}"></span>
-                    ${firestoreConnected ? "Firestore connecté • Temps réel actif" : "Mode Local"}
-                  </span>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-black text-lg tracking-tight text-white">B training</span>
+                  ${badgeHtml}
                 </div>
-                <p class="text-xs text-slate-400 hidden sm:block">Plateforme Coaching • Séances, Biométrie & Nutrition</p>
               </div>
             </div>
 
-            ${session.role ? `
-              <div class="flex items-center gap-3">
-                <span class="text-xs text-slate-300 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
-                  ${session.role === "coach" ? "Coach • B training" : `Athlète • ${escapeHtml(activeAthlete?.name || "")}`}
+            ${state.role ? `
+              <div class="flex items-center gap-2">
+                <span class="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-orange-300">
+                  ${state.role === "coach" ? "Espace Coach" : esc(currentAth?.nom || "Athlète")}
                 </span>
-                <button type="button" onclick="logoutSession()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-200 hover:border-rose-400/40 border border-slate-700 text-xs font-semibold text-slate-200 transition">
+                <button type="button" onclick="logoutApp()" class="px-3.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200 transition">
                   Déconnexion
                 </button>
               </div>
@@ -844,569 +1693,750 @@
     }
 
     function renderLoginScreen() {
+      ensureDefaultAccountsPresent();
+      const demoAthletes = [
+        athletes.find((a) => (a.code || "").toUpperCase() === "LUCAS-2026") || athletes[0],
+        athletes.find((a) => (a.code || "").toUpperCase() === "CHLOE-2026") || athletes[1],
+        athletes.find((a) => (a.code || "").toUpperCase() === "MAX-2026") || athletes[2]
+      ].filter(Boolean);
+
       return `
-        <main class="flex-1 flex items-center justify-center px-4 py-10">
-          <div class="max-w-xl w-full glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-800">
-            <div class="text-center mb-7">
-              <div class="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-br from-sky-400 to-emerald-400 text-slate-950 font-black text-2xl mb-3 shadow-lg shadow-sky-500/25">
+        <main class="flex-1 flex items-center justify-center px-4 py-8">
+          <div class="max-w-md w-full glass-card rounded-3xl p-6 sm:p-7 space-y-5 border border-zinc-800 shadow-2xl">
+            <div class="text-center space-y-2">
+              <div class="h-14 w-14 mx-auto rounded-2xl btn-gradient flex items-center justify-center font-black text-2xl shadow-xl shadow-orange-500/25">
                 B
               </div>
-              <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">B training</h1>
-              <p class="text-sm text-slate-400 mt-1.5">Suivi athlétique, programmation & chronomètre de repos en direct</p>
+              <h1 class="text-2xl font-black text-white tracking-tight">Bienvenue sur B training</h1>
+              <p class="text-xs sm:text-sm text-zinc-400">Suivi sportif personnalisé, séances adaptées aux machines de ta salle et synchronisation en direct.</p>
             </div>
 
-            <!-- Dual Login Tabs -->
-            <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-6">
-              <button type="button" id="tab-btn-athlete" onclick="switchLoginTab('athlete')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-sky-500 text-slate-950 shadow transition">
+            <div class="grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-zinc-950 border border-zinc-800">
+              <button type="button" onclick="setLoginTab('athlete')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold transition ${
+                state.loginTab === "athlete"
+                  ? "btn-gradient shadow"
+                  : "text-zinc-400 hover:text-white"
+              }">
                 Accès Athlète
               </button>
-              <button type="button" id="tab-btn-coach" onclick="switchLoginTab('coach')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition">
+              <button type="button" onclick="setLoginTab('coach')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold transition ${
+                state.loginTab === "coach"
+                  ? "btn-gradient shadow"
+                  : "text-zinc-400 hover:text-white"
+              }">
                 Espace Coach
               </button>
             </div>
 
-            <!-- Athlete Login Panel -->
-            <form id="login-panel-athlete" onsubmit="loginAthleteByCode(event)" class="space-y-4">
-              <div>
-                <label for="athlete-code-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                  Code d'accès Athlète
-                </label>
-                <input
-                  id="athlete-code-input"
-                  type="text"
-                  value="LUCAS-2026"
-                  placeholder="Ex : LUCAS-2026"
-                  required
-                  class="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/80 focus:border-sky-400 focus:outline-none text-white font-semibold tracking-wider uppercase"
-                />
-              </div>
-              <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                <span>Comptes démo :</span>
-                <button type="button" onclick="quickFillAthleteCode('LUCAS-2026')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 font-semibold">LUCAS-2026</button>
-                <button type="button" onclick="quickFillAthleteCode('CHLOE-2026')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-semibold">CHLOE-2026</button>
-              </div>
-              <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-emerald-400 hover:opacity-95 text-slate-950 font-extrabold text-sm shadow-lg shadow-sky-500/20 transition">
-                Accéder à mon espace Athlète
-              </button>
-            </form>
+            <div id="login-feedback-box" class="${state.loginFeedback ? "" : "hidden"} rounded-xl px-3.5 py-2.5 text-xs font-bold border ${
+              state.loginFeedbackError
+                ? "bg-rose-500/15 border-rose-500/45 text-rose-200"
+                : "bg-emerald-500/15 border-emerald-500/45 text-emerald-200"
+            }">
+              ${esc(state.loginFeedback || "")}
+            </div>
 
-            <!-- Coach Login Panel -->
-            <form id="login-panel-coach" onsubmit="loginCoach(event)" class="space-y-4 hidden">
-              <div>
-                <label for="coach-email-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                  Email Coach
-                </label>
-                <input
-                  id="coach-email-input"
-                  type="email"
-                  value="coach@btraining.fr"
-                  required
-                  class="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/80 focus:border-sky-400 focus:outline-none text-white"
-                />
-              </div>
-              <div>
-                <label for="coach-password-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                  Mot de passe
-                </label>
-                <input
-                  id="coach-password-input"
-                  type="password"
-                  value="admin"
-                  required
-                  class="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/80 focus:border-sky-400 focus:outline-none text-white"
-                />
-              </div>
-              <p class="text-xs text-slate-400">Identifiants par défaut : <span class="text-slate-200 font-semibold">coach@btraining.fr</span> / <span class="text-slate-200 font-semibold">admin</span></p>
-              <button type="submit" class="w-full py-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-sm transition">
-                Ouvrir le tableau de bord Coach
+            ${state.loginTab === "athlete" ? `
+              <form onsubmit="return loginWithAthleteCode(event)" class="space-y-4">
+                <div>
+                  <label for="athlete-code-input" class="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5">Code personnel athlète</label>
+                  <input id="athlete-code-input" type="text" value="LUCAS-2026" autocomplete="off" placeholder="Ex : LUCAS-2026" class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-700 focus:border-orange-500 focus:outline-none text-sm font-mono font-bold uppercase text-orange-300" />
+                </div>
+                <button type="submit" onclick="loginWithAthleteCode(event)" class="w-full py-3.5 rounded-xl btn-gradient font-black text-sm shadow-lg shadow-orange-500/20 transition cursor-pointer">
+                  Accéder à mon programme
+                </button>
+              </form>
+            ` : `
+              <form onsubmit="return loginCoach(event)" class="space-y-4">
+                <div>
+                  <label for="coach-email-input" class="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5">Identifiant Coach</label>
+                  <input id="coach-email-input" type="email" value="coach@btraining.fr" autocomplete="username" class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-700 focus:border-orange-500 focus:outline-none text-sm text-white" />
+                </div>
+                <div>
+                  <label for="coach-pass-input" class="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5">Mot de passe</label>
+                  <input id="coach-pass-input" type="password" value="admin" autocomplete="current-password" class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-700 focus:border-orange-500 focus:outline-none text-sm text-white" />
+                </div>
+                <button type="submit" onclick="loginCoach(event)" class="w-full py-3.5 rounded-xl btn-gradient font-black text-sm shadow-lg shadow-orange-500/20 transition cursor-pointer">
+                  Ouvrir le tableau de bord Coach
+                </button>
+              </form>
+            `}
+
+            <!-- Accès directs en 1 clic toujours visibles -->
+            <div class="pt-4 border-t border-zinc-800/90 space-y-2.5">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 text-center">Accès direct en 1 clic</p>
+              <button type="button" onclick="quickLoginCoach()" class="w-full py-2.5 px-3 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/40 text-xs font-extrabold text-orange-300 transition cursor-pointer">
+                Connexion rapide Coach (coach@btraining.fr)
               </button>
-            </form>
+              <div class="grid grid-cols-3 gap-2">
+                ${demoAthletes.map((a) => `
+                  <button type="button" onclick="quickLoginAthlete('${esc(a.code)}')" class="py-2 px-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/90 text-[11px] font-bold text-zinc-200 transition cursor-pointer flex flex-col items-center">
+                    <span class="truncate max-w-full">${esc(a.nom.split(" ")[0])}</span>
+                    <span class="text-[9px] font-mono text-amber-300 mt-0.5">${esc(a.code)}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
           </div>
         </main>
       `;
     }
-
-    window.switchLoginTab = function(tab) {
-      const btnAth = document.getElementById("tab-btn-athlete");
-      const btnCoach = document.getElementById("tab-btn-coach");
-      const panelAth = document.getElementById("login-panel-athlete");
-      const panelCoach = document.getElementById("login-panel-coach");
-      if (!btnAth || !btnCoach || !panelAth || !panelCoach) return;
-
-      if (tab === "athlete") {
-        btnAth.className = "py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-sky-500 text-slate-950 shadow transition";
-        btnCoach.className = "py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition";
-        panelAth.classList.remove("hidden");
-        panelCoach.classList.add("hidden");
-      } else {
-        btnCoach.className = "py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-sky-500 text-slate-950 shadow transition";
-        btnAth.className = "py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition";
-        panelCoach.classList.remove("hidden");
-        panelAth.classList.add("hidden");
-      }
-    };
 
     function renderCoachDashboard() {
-      const selectedAth = getAthleteById(session.selectedCoachAthleteId);
-      const totalExercises = appState.athletes.reduce(
-        (acc, a) => acc + a.workouts.reduce((wAcc, w) => wAcc + w.exercises.length, 0),
-        0
-      );
+      const tabs = [
+        { id: "athletes", label: `Athlètes (${athletes.length})`, short: "Athlètes", icon: "users" },
+        { id: "builder", label: "Séances", short: "Séances", icon: "dumbbell" },
+        { id: "catalog", label: `Catalogue (${exercisesCatalog.length})`, short: "Catalogue", icon: "book" },
+        { id: "gyms", label: `Salles (${gyms.length})`, short: "Salles", icon: "building" },
+        { id: "tracking", label: `Suivi (${checkins.length})`, short: "Suivi", icon: "activity" }
+      ];
 
       return `
-        <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
-          <!-- KPI Row -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="glass-panel rounded-2xl p-4">
-              <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Athlètes suivis</p>
-              <p class="text-2xl font-extrabold text-white mt-1">${appState.athletes.length}</p>
-            </div>
-            <div class="glass-panel rounded-2xl p-4">
-              <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Exercices programmés</p>
-              <p class="text-2xl font-extrabold text-sky-400 mt-1">${totalExercises}</p>
-            </div>
-            <div class="glass-panel rounded-2xl p-4">
-              <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Athlète sélectionné</p>
-              <p class="text-lg font-bold text-emerald-300 mt-1 truncate">${escapeHtml(selectedAth?.name || "—")}</p>
-            </div>
-          </div>
+        <main class="flex-1 max-w-6xl w-full mx-auto px-4 pt-5 pb-28 sm:pb-12 space-y-5">
+          <!-- Barre de navigation Coach Desktop -->
+          <nav aria-label="Menu Coach" class="hidden sm:grid glass-card rounded-2xl p-2 grid-cols-5 gap-2 border border-zinc-800">
+            ${tabs.map((t) => {
+              const active = state.coachTab === t.id;
+              return `
+                <button type="button" onclick="setCoachTab('${t.id}')" class="py-3 px-3 rounded-xl text-xs lg:text-sm font-extrabold flex items-center justify-center gap-2 transition ${
+                  active
+                    ? "btn-gradient shadow-lg shadow-orange-500/20"
+                    : "text-zinc-300 hover:bg-zinc-800/80 hover:text-white"
+                }">
+                  ${svgIcon(t.icon, "w-4 h-4 shrink-0")}
+                  <span class="truncate">${t.label}</span>
+                </button>
+              `;
+            }).join("")}
+          </nav>
 
-          <!-- Coach Navigation Tabs -->
-          <div class="flex flex-wrap gap-2">
-            <button type="button" onclick="setCoachTab('athletes')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.coachActiveTab === 'athletes' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
-              Athlètes & Création
-            </button>
-            <button type="button" onclick="setCoachTab('workouts')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.coachActiveTab === 'workouts' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
-              Assigner Séance & Vidéo
-            </button>
-            <button type="button" onclick="setCoachTab('tracking')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.coachActiveTab === 'tracking' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
-              Biométrie & Nutrition
-            </button>
-          </div>
-
-          ${session.coachActiveTab === "athletes" ? renderCoachAthletesTab() : ""}
-          ${session.coachActiveTab === "workouts" ? renderCoachWorkoutsTab(selectedAth) : ""}
-          ${session.coachActiveTab === "tracking" ? renderCoachTrackingTab(selectedAth) : ""}
+          <!-- Accès direct aux données de l'onglet actif (sans gros carrés KPI au milieu) -->
+          ${state.coachTab === "athletes" ? renderCoachAthletesTab() : ""}
+          ${state.coachTab === "builder" ? renderCoachBuilderTab() : ""}
+          ${state.coachTab === "catalog" ? renderCoachCatalogTab() : ""}
+          ${state.coachTab === "gyms" ? renderCoachGymsTab() : ""}
+          ${state.coachTab === "tracking" ? renderCoachTrackingTab() : ""}
         </main>
+
+        <!-- Barre de navigation mobile fixe en bas -->
+        <nav aria-label="Menu Mobile Coach" class="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-zinc-950/95 backdrop-blur border-t border-zinc-800 px-1.5 py-2 grid grid-cols-5 gap-1">
+          ${tabs.map((t) => {
+            const active = state.coachTab === t.id;
+            return `
+              <button type="button" onclick="setCoachTab('${t.id}')" class="py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 text-[10px] font-bold transition ${
+                active ? "bg-orange-500/20 text-orange-300 border border-orange-500/40" : "text-zinc-400"
+              }">
+                ${svgIcon(t.icon, "w-4 h-4")}
+                <span class="truncate max-w-full">${t.short}</span>
+              </button>
+            `;
+          }).join("")}
+        </nav>
       `;
     }
 
-    window.setCoachTab = function(tab) {
-      session.coachActiveTab = tab;
-      render();
-    };
-
-    window.selectCoachAthlete = function(athleteId) {
-      session.selectedCoachAthleteId = athleteId;
-      render();
-    };
-
     function renderCoachAthletesTab() {
+      const q = state.athleteSearch.trim().toLowerCase();
+      const filtered = athletes.filter((a) => {
+        const gym = getGym(a.salleId);
+        const matchText =
+          !q ||
+          a.nom.toLowerCase().includes(q) ||
+          a.code.toLowerCase().includes(q) ||
+          a.objectif.toLowerCase().includes(q) ||
+          gym.nom.toLowerCase().includes(q);
+        const matchGym = state.athleteGymFilter === "all" || a.salleId === state.athleteGymFilter;
+        return matchText && matchGym;
+      });
+
       return `
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div class="lg:col-span-7 space-y-3">
-            <h2 class="text-base font-bold text-white">Liste des Athlètes</h2>
-            ${appState.athletes.map((ath) => {
-              const isSelected = ath.id === session.selectedCoachAthleteId;
-              const latestBio = ath.biometrics[ath.biometrics.length - 1];
+        <section class="space-y-5">
+          <div class="glass-card rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div class="flex-1 flex flex-col sm:flex-row gap-3">
+              <input type="search" value="${esc(state.athleteSearch)}" oninput="setAthleteSearch(this.value)" placeholder="Rechercher un athlète, code, objectif ou salle..." class="w-full sm:max-w-xs px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 focus:border-orange-500 focus:outline-none text-xs sm:text-sm text-white" />
+              <select onchange="setAthleteGymFilter(this.value)" class="px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-xs sm:text-sm font-semibold text-amber-300">
+                <option value="all" ${state.athleteGymFilter === "all" ? "selected" : ""}>Toutes les salles (${gyms.length})</option>
+                ${gyms.map((g) => `<option value="${g.id}" ${state.athleteGymFilter === g.id ? "selected" : ""}>${esc(g.nom)}</option>`).join("")}
+              </select>
+            </div>
+            <button type="button" onclick="openNewAthleteModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl btn-gradient font-extrabold text-xs sm:text-sm shrink-0">
+              ${svgIcon("plus", "w-4 h-4")}
+              <span>Nouvel Athlète</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            ${filtered.map((ath) => {
+              const gym = getGym(ath.salleId);
+              const pct = getWorkoutProgress(ath);
+              const initials = ath.nom.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+
               return `
-                <div onclick="selectCoachAthlete('${ath.id}')" class="cursor-pointer glass-panel rounded-2xl p-4 border transition ${isSelected ? 'border-sky-400 bg-sky-950/20' : 'border-slate-800 hover:border-slate-700'}">
-                  <div class="flex items-start justify-between gap-3">
-                    <div>
-                      <div class="flex items-center gap-2 flex-wrap">
-                        <h3 class="font-bold text-white text-base">${escapeHtml(ath.name)}</h3>
-                        <span class="px-2.5 py-0.5 rounded-lg bg-sky-500/15 text-sky-300 text-xs font-mono font-bold">${escapeHtml(ath.code)}</span>
+                <article onclick="openAthleteDetailModal('${ath.id}')" class="glass-card rounded-3xl p-5 flex flex-col justify-between gap-4 border border-zinc-800 hover:border-orange-500/55 transition cursor-pointer shadow-xl">
+                  <div class="space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="flex items-center gap-3 min-w-0">
+                        <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-500/25 to-amber-400/20 border border-orange-500/40 flex items-center justify-center text-orange-300 font-black text-base shrink-0">
+                          ${esc(initials)}
+                        </div>
+                        <div class="min-w-0">
+                          <h2 class="font-extrabold text-white text-base truncate">${esc(ath.nom)}</h2>
+                          <p class="text-xs font-semibold text-amber-300 truncate">${esc(ath.objectif)}</p>
+                        </div>
                       </div>
-                      <p class="text-xs text-slate-400 mt-1">${escapeHtml(ath.sport)} • ${escapeHtml(ath.objective)}</p>
+                      <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 shrink-0">${esc(ath.statut)}</span>
                     </div>
-                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300">${escapeHtml(ath.status)}</span>
+
+                    <div onclick="event.stopPropagation()" class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-1.5">
+                      <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-zinc-400 font-semibold">Salle attribuée</span>
+                        <span class="text-amber-300 font-bold">${gym.machines?.length || 0} machines</span>
+                      </div>
+                      <select onchange="assignAthleteGym('${ath.id}', this.value)" class="w-full px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs font-bold text-white">
+                        ${gyms.map((g) => `<option value="${g.id}" ${g.id === gym.id ? "selected" : ""}>${esc(g.nom)}</option>`).join("")}
+                      </select>
+                    </div>
+
+                    <div class="flex items-center justify-between px-3.5 py-2 rounded-xl bg-zinc-950 border border-zinc-800">
+                      <span class="text-[11px] uppercase tracking-wider text-zinc-400 font-semibold">Code accès</span>
+                      <button type="button" onclick="copyAccessCode('${esc(ath.code)}', event)" class="text-xs font-mono font-bold text-orange-300 hover:text-orange-200">
+                        ${esc(ath.code)} <span class="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded ml-1">Copier</span>
+                      </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5 text-xs">
+                      <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+                        <span class="text-zinc-400 block">Poids actuel</span>
+                        <strong class="text-sm font-extrabold text-white">${ath.poidsActuel} kg</strong>
+                      </div>
+                      <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+                        <span class="text-zinc-400 block">Séance active</span>
+                        <strong class="text-sm font-extrabold text-orange-400">${pct}% (${ath.exercices?.length || 0} ex.)</strong>
+                      </div>
+                    </div>
                   </div>
-                  <div class="mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap gap-4 text-xs text-slate-300">
-                    <span>Séances : <strong>${ath.workouts.length}</strong></span>
-                    <span>Poids actuel : <strong>${latestBio ? latestBio.weightKg + " kg" : "—"}</strong></span>
-                    <span>Logs nutrition : <strong>${ath.nutritionLogs.length}</strong></span>
+
+                  <div class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="event.stopPropagation(); openAthleteDetailModal('${ath.id}')" class="py-2.5 px-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 font-bold text-xs">Fiche</button>
+                    <button type="button" onclick="jumpToBuilder('${ath.id}', event)" class="py-2.5 px-2 rounded-xl btn-gradient font-extrabold text-xs">Séance</button>
+                    <button type="button" onclick="jumpToTracking('${ath.id}', event)" class="py-2.5 px-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-emerald-300 border border-zinc-700 font-bold text-xs">Suivi</button>
                   </div>
-                </div>
+                </article>
               `;
             }).join("")}
           </div>
-
-          <form onsubmit="createAthleteProfile(event)" class="lg:col-span-5 glass-panel rounded-2xl p-5 space-y-4 h-fit">
-            <h2 class="text-base font-bold text-white">Nouvel Athlète</h2>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Nom complet</label>
-              <input id="new-ath-name" type="text" required placeholder="Ex : Léa Martin" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Code d'accès unique</label>
-              <input id="new-ath-code" type="text" required placeholder="Ex : LEA-2026" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white uppercase" />
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Discipline</label>
-              <input id="new-ath-sport" type="text" placeholder="Ex : Cross-Training / Hypertrophie" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Objectif principal</label>
-              <input id="new-ath-obj" type="text" placeholder="Ex : Force & recomposition corporelle" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-            </div>
-            <button type="submit" class="w-full py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-extrabold text-sm transition">
-              Créer le profil Athlète
-            </button>
-          </form>
-        </div>
+        </section>
       `;
     }
 
-    function renderCoachWorkoutsTab(selectedAth) {
-      const defaultWorkoutTitle = selectedAth?.workouts?.[0]?.title || "Séance A — Haut du Corps";
-      return `
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <form onsubmit="assignExerciseToAthlete(event)" class="lg:col-span-6 glass-panel rounded-2xl p-5 space-y-3.5">
-            <h2 class="text-base font-bold text-white">Assigner un Exercice + Guide Machine / Vidéo</h2>
+    function renderCoachBuilderTab() {
+      const ath = athletes.find((a) => a.id === builderDraft.athleteId) || athletes[0];
+      if (!ath) return "";
+      const gym = getGym(ath.salleId);
 
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Athlète cible</label>
-              <select id="assign-athlete-select" onchange="selectCoachAthlete(this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white">
-                ${appState.athletes.map((a) => `<option value="${a.id}" ${a.id === selectedAth?.id ? "selected" : ""}>${escapeHtml(a.name)} (${escapeHtml(a.code)})</option>`).join("")}
+      const groups = ["Tous", "Pectoraux", "Dos", "Jambes", "Épaules", "Bras", "Abdos", "Cardio"];
+      const search = state.builderSearch.trim().toLowerCase();
+
+      const filteredCatalog = exercisesCatalog.filter((ex) => {
+        const okMuscle = state.builderMuscleFilter === "Tous" || ex.groupe === state.builderMuscleFilter;
+        const okText = !search || ex.nom.toLowerCase().includes(search) || ex.machine.toLowerCase().includes(search);
+        const okGym = !state.builderCompatibleOnly || isExerciseCompatible(ex, gym);
+        return okMuscle && okText && okGym;
+      });
+
+      return `
+        <section class="space-y-6">
+          <div class="glass-card rounded-3xl p-5 space-y-4 border border-zinc-800">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+              <div class="lg:col-span-5">
+                <label class="block text-xs font-bold uppercase tracking-wider text-orange-400 mb-1.5">Athlète sélectionné</label>
+                <select onchange="selectBuilderAthlete(this.value)" class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-zinc-700 text-sm font-bold text-white">
+                  ${athletes.map((a) => `<option value="${a.id}" ${a.id === ath.id ? "selected" : ""}>${esc(a.nom)} — ${esc(getGym(a.salleId).nom)}</option>`).join("")}
+                </select>
+              </div>
+              <div class="lg:col-span-4">
+                <label class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-1.5">Salle (${gym.machines?.length || 0} machines)</label>
+                <select onchange="assignAthleteGym('${ath.id}', this.value)" class="w-full px-4 py-3 rounded-xl bg-zinc-950 border border-amber-500/40 text-sm font-bold text-amber-300">
+                  ${gyms.map((g) => `<option value="${g.id}" ${g.id === gym.id ? "selected" : ""}>${esc(g.nom)}</option>`).join("")}
+                </select>
+              </div>
+              <div class="lg:col-span-3">
+                <button type="button" onclick="composeCompatibleWorkout()" class="w-full py-3 px-4 rounded-xl bg-zinc-800 hover:bg-orange-500/20 border border-orange-500/45 text-xs font-extrabold text-orange-300 transition">
+                  ⚡ Composer selon la salle
+                </button>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">Machines disponibles à <span class="text-white">${esc(gym.nom)}</span> :</p>
+              <div class="flex flex-wrap gap-1.5">
+                ${(gym.machines || []).map((m) => `<span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[11px] font-semibold text-emerald-300">✓ ${esc(m)}</span>`).join("")}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-zinc-400 mb-1">Titre de la séance</label>
+                <input type="text" value="${esc(builderDraft.title)}" oninput="setBuilderField('title', this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm font-bold text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-zinc-400 mb-1">Jour / Créneau</label>
+                <input type="text" value="${esc(builderDraft.scheduledDay)}" oninput="setBuilderField('scheduledDay', this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+              </div>
+              <div class="sm:col-span-3">
+                <label class="block text-xs font-semibold text-zinc-400 mb-1">Consignes du coach</label>
+                <input type="text" value="${esc(builderDraft.notes)}" oninput="setBuilderField('notes', this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-3xl p-5 space-y-4 border border-zinc-800">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <h2 class="text-base font-extrabold text-white">Ajouter depuis le catalogue (${filteredCatalog.length} exercices)</h2>
+                <p class="text-xs text-zinc-400">Vérification automatique avec les équipements de <strong class="text-zinc-200">${esc(gym.nom)}</strong>.</p>
+              </div>
+              <label class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-950 border border-orange-500/40 cursor-pointer text-xs font-extrabold text-orange-300">
+                <input type="checkbox" ${state.builderCompatibleOnly ? "checked" : ""} onchange="toggleBuilderCompatibleOnly(this.checked)" class="rounded border-zinc-600 text-orange-500" />
+                <span>Machines compatibles uniquement</span>
+              </label>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input type="search" value="${esc(state.builderSearch)}" oninput="setBuilderSearch(this.value)" placeholder="Rechercher un exercice ou une machine..." class="w-full sm:max-w-xs px-3.5 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-xs sm:text-sm text-white" />
+              <div class="flex flex-wrap gap-1.5">
+                ${groups.map((grp) => `
+                  <button type="button" onclick="setBuilderMuscleFilter('${grp}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                    state.builderMuscleFilter === grp
+                      ? "btn-gradient"
+                      : "bg-zinc-900 text-zinc-300 border border-zinc-800"
+                  }">${grp}</button>
+                `).join("")}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-1">
+              ${filteredCatalog.map((item) => {
+                const ok = isExerciseCompatible(item, gym);
+                return `
+                  <div class="p-3.5 rounded-2xl bg-zinc-950 border ${ok ? "border-zinc-800" : "border-amber-500/45"} flex flex-col justify-between gap-2.5">
+                    <div>
+                      <div class="flex items-center justify-between gap-2 mb-1">
+                        <span class="text-[11px] font-bold text-orange-300">${esc(item.groupe)}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          ok ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
+                        }">${ok ? "Compatible salle" : "Machine absente"}</span>
+                      </div>
+                      <h3 class="text-sm font-extrabold text-white">${esc(item.nom)}</h3>
+                      <p class="text-[11px] text-zinc-400 mt-0.5">${esc(item.machine)} • ${item.setsDefault}×${esc(item.repsDefault)}</p>
+                    </div>
+                    <button type="button" onclick="addExerciseToDraft('${item.id}')" class="w-full py-2 rounded-xl bg-zinc-800 hover:bg-orange-500 hover:text-zinc-950 text-orange-300 font-extrabold text-xs transition">
+                      + Ajouter à la séance
+                    </button>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <form onsubmit="publishDraftWorkout(event)" class="space-y-4">
+            <h2 class="text-base font-extrabold text-white">Exercices de la séance (${builderDraft.exercises.length})</h2>
+            ${builderDraft.exercises.length === 0 ? `
+              <div class="glass-card rounded-2xl p-6 text-center text-xs text-zinc-400 border border-dashed border-zinc-700">
+                Aucun exercice dans cette séance. Ajoute des exercices ci-dessus ou clique sur « Composer selon la salle ».
+              </div>
+            ` : `
+              <div class="space-y-3">
+                ${builderDraft.exercises.map((item, idx) => {
+                  const ex = getExerciseById(item.exId);
+                  const ok = isExerciseCompatible(ex, gym);
+                  return `
+                    <div class="glass-card rounded-2xl p-4 space-y-3 border ${ok ? "border-zinc-800" : "border-amber-500/50"}">
+                      <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
+                          <span class="h-7 w-7 rounded-lg bg-orange-500/20 text-orange-300 font-black text-xs flex items-center justify-center">#${idx + 1}</span>
+                          <span class="text-sm font-extrabold text-white">${esc(ex.nom)}</span>
+                          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            ok ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"
+                          }">${esc(ex.machine)} • ${ok ? "Compatible salle" : "Machine absente"}</span>
+                        </div>
+                        <button type="button" onclick="removeDraftExercise(${idx})" class="px-3 py-1 rounded-lg bg-rose-500/20 text-xs font-bold text-rose-300">Retirer</button>
+                      </div>
+
+                      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                          <label class="block text-[11px] text-zinc-400 mb-1">Séries</label>
+                          <input type="number" min="1" max="10" value="${item.series}" oninput="updateDraftExercise(${idx}, 'series', this.value)" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-xs font-bold text-white" />
+                        </div>
+                        <div>
+                          <label class="block text-[11px] text-zinc-400 mb-1">Répétitions</label>
+                          <input type="text" value="${esc(item.reps)}" oninput="updateDraftExercise(${idx}, 'reps', this.value)" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-xs text-white" />
+                        </div>
+                        <div>
+                          <label class="block text-[11px] text-zinc-400 mb-1">Charge cible</label>
+                          <input type="text" value="${esc(item.charge)}" oninput="updateDraftExercise(${idx}, 'charge', this.value)" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-xs font-bold text-orange-300" />
+                        </div>
+                        <div>
+                          <label class="block text-[11px] text-zinc-400 mb-1">Repos (sec)</label>
+                          <input type="number" min="15" max="360" value="${item.reposSec}" oninput="updateDraftExercise(${idx}, 'reposSec', this.value)" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-xs font-bold text-amber-300" />
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                }).join("")}
+              </div>
+            `}
+
+            <div class="glass-card rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-orange-500/35">
+              <p class="text-xs text-zinc-300">Synchronisation directe vers l'espace de <strong class="text-white">${esc(ath.nom)}</strong>.</p>
+              <button type="submit" class="px-6 py-3.5 rounded-xl btn-gradient font-black text-xs sm:text-sm shadow-lg shadow-orange-500/25 shrink-0">
+                Publier la séance
+              </button>
+            </div>
+          </form>
+        </section>
+      `;
+    }
+
+    function renderCoachCatalogTab() {
+      const groups = ["Tous", "Pectoraux", "Dos", "Jambes", "Épaules", "Bras", "Abdos", "Cardio"];
+      const search = state.catalogSearch.trim().toLowerCase();
+
+      const filtered = exercisesCatalog.filter((ex) => {
+        const okMuscle = state.catalogMuscleFilter === "Tous" || ex.groupe === state.catalogMuscleFilter;
+        const okMachine = state.catalogMachineFilter === "Toutes" || ex.machine === state.catalogMachineFilter;
+        const okText = !search || ex.nom.toLowerCase().includes(search) || ex.machine.toLowerCase().includes(search);
+        return okMuscle && okMachine && okText;
+      });
+
+      return `
+        <section class="space-y-5">
+          <div class="glass-card rounded-3xl p-5 space-y-4 border border-zinc-800">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 class="text-lg font-black text-white">Catalogue d'Exercices (${filtered.length} / ${exercisesCatalog.length})</h2>
+                <p class="text-xs text-zinc-400 mt-0.5">Base complète en français avec réglages machines, consignes et fiches modifiables.</p>
+              </div>
+              <button type="button" onclick="openExerciseEditorModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl btn-gradient font-extrabold text-xs sm:text-sm shrink-0">
+                ${svgIcon("plus", "w-4 h-4")}
+                <span>Ajouter un exercice</span>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input type="search" value="${esc(state.catalogSearch)}" oninput="setCatalogSearch(this.value)" placeholder="Rechercher un exercice..." class="w-full px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-xs sm:text-sm text-white" />
+              <select onchange="setCatalogMachine(this.value)" class="w-full px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-xs sm:text-sm font-bold text-amber-300">
+                <option value="Toutes" ${state.catalogMachineFilter === "Toutes" ? "selected" : ""}>Toutes les machines (${MACHINES_REFERENTIEL.length})</option>
+                ${MACHINES_REFERENTIEL.map((m) => `<option value="${esc(m)}" ${state.catalogMachineFilter === m ? "selected" : ""}>${esc(m)}</option>`).join("")}
               </select>
             </div>
 
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Nom de la séance</label>
-              <input id="assign-workout-title" type="text" value="${escapeHtml(defaultWorkoutTitle)}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+            <div class="flex flex-wrap gap-1.5">
+              ${groups.map((grp) => `
+                <button type="button" onclick="setCatalogMuscle('${grp}')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition ${
+                  state.catalogMuscleFilter === grp
+                    ? "btn-gradient"
+                    : "bg-zinc-900 text-zinc-300 border border-zinc-800"
+                }">${grp}</button>
+              `).join("")}
             </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Exercice</label>
-                <input id="assign-ex-name" type="text" required placeholder="Ex : Rowing Barre" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Machine / Matériel</label>
-                <input id="assign-ex-machine" type="text" placeholder="Ex : Barre olympique + disques" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Séries</label>
-                <input id="assign-ex-sets" type="number" min="1" max="8" value="4" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Reps cibles</label>
-                <input id="assign-ex-reps" type="text" value="8-12 reps" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Charge repère</label>
-                <input id="assign-ex-load" type="text" value="60 kg" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-              </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Repos (sec)</label>
-                <input id="assign-ex-rest" type="number" min="15" max="300" value="90" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Lien vidéo d'exécution (optionnel)</label>
-              <input id="assign-ex-video" type="url" placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
-            </div>
-
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Conseil d'exécution</label>
-              <textarea id="assign-ex-exec" rows="2" placeholder="Amplitude, tempo, respiration..." class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white"></textarea>
-            </div>
-
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">Réglage machine & sécurité</label>
-              <textarea id="assign-ex-machinetip" rows="2" placeholder="Hauteur siège, butées, placement pieds..." class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white"></textarea>
-            </div>
-
-            <button type="submit" class="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-sm transition">
-              Assigner à la séance de l'athlète
-            </button>
-          </form>
-
-          <div class="lg:col-span-6 space-y-4">
-            <h2 class="text-base font-bold text-white">Programme actuel de ${escapeHtml(selectedAth?.name || "")}</h2>
-            ${(selectedAth?.workouts || []).map((wk) => `
-              <div class="glass-panel rounded-2xl p-4 space-y-3">
-                <div class="flex items-center justify-between gap-2">
-                  <div>
-                    <h3 class="font-bold text-white">${escapeHtml(wk.title)}</h3>
-                    <p class="text-xs text-slate-400">${escapeHtml(wk.focus)} • Repos par défaut : ${wk.restDefault}s</p>
-                  </div>
-                  <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-sky-300 font-semibold">${wk.exercises.length} exos</span>
-                </div>
-                <div class="space-y-2">
-                  ${wk.exercises.map((ex) => {
-                    const doneCount = (ex.completedSets || []).filter(Boolean).length;
-                    return `
-                      <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3">
-                        <div class="min-w-0">
-                          <p class="text-sm font-semibold text-slate-100 truncate">${escapeHtml(ex.name)}</p>
-                          <p class="text-xs text-slate-400">${ex.setsCount} × ${escapeHtml(ex.repsTarget)} • ${escapeHtml(ex.loadHint)} • Repos ${ex.restSec}s</p>
-                        </div>
-                        <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${doneCount === ex.setsCount ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'}">
-                          ${doneCount}/${ex.setsCount} séries
-                        </span>
-                      </div>
-                    `;
-                  }).join("")}
-                </div>
-              </div>
-            `).join("")}
           </div>
-        </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${filtered.map((ex) => {
+              const eqGyms = gyms.filter((g) => isExerciseCompatible(ex, g)).length;
+              return `
+                <article class="glass-card rounded-3xl p-5 flex flex-col justify-between gap-4 border border-zinc-800 hover:border-orange-500/45 transition">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-500/15 text-orange-300 border border-orange-500/30">${esc(ex.groupe)}</span>
+                      <span class="text-[11px] font-semibold text-emerald-300">${eqGyms}/${gyms.length} salles</span>
+                    </div>
+                    <h3 class="text-base font-extrabold text-white">${esc(ex.nom)}</h3>
+                    <div class="p-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs space-y-1">
+                      <p class="text-zinc-400">Machine : <strong class="text-amber-300">${esc(ex.machine)}</strong></p>
+                      <p class="text-zinc-400">Format : <strong class="text-white">${ex.setsDefault}×${esc(ex.repsDefault)}</strong> • Repos ${ex.restSec}s</p>
+                    </div>
+                    <p class="text-xs text-zinc-400">${esc(ex.execution)}</p>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="openExerciseGuideModal('${ex.id}')" class="py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white border border-zinc-700">Guide & Vidéo</button>
+                    <button type="button" onclick="openExerciseEditorModal('${ex.id}')" class="py-2 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-xs font-extrabold text-amber-300 border border-amber-500/35">Modifier</button>
+                  </div>
+                </article>
+              `;
+            }).join("")}
+          </div>
+        </section>
       `;
     }
 
-    function renderCoachTrackingTab(selectedAth) {
+    function renderCoachGymsTab() {
+      const currentGym = getGym(state.selectedGymId);
+      const machinesSet = new Set(currentGym.machines || []);
+      const assigned = athletes.filter((a) => a.salleId === currentGym.id);
+
       return `
-        <div class="glass-panel rounded-2xl p-5 space-y-5">
-          <div class="flex flex-wrap items-center justify-between gap-3">
+        <section class="space-y-5">
+          <div class="glass-card rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-zinc-800">
             <div>
-              <h2 class="text-lg font-bold text-white">Suivi Biométrique & Nutritionnel — ${escapeHtml(selectedAth?.name || "")}</h2>
-              <p class="text-xs text-slate-400">Objectif : ${escapeHtml(selectedAth?.objective || "")}</p>
+              <h2 class="text-lg font-black text-white">Salles de sport & Équipements</h2>
+              <p class="text-xs text-zinc-400 mt-0.5">Coche les machines disponibles dans chaque salle pour filtrer automatiquement les exercices de tes clients.</p>
             </div>
-            <select onchange="selectCoachAthlete(this.value)" class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-semibold text-white">
-              ${appState.athletes.map((a) => `<option value="${a.id}" ${a.id === selectedAth?.id ? "selected" : ""}>${escapeHtml(a.name)}</option>`).join("")}
+            <button type="button" onclick="openNewGymModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl btn-gradient font-extrabold text-xs sm:text-sm shrink-0">
+              ${svgIcon("plus", "w-4 h-4")}
+              <span>Nouvelle salle</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div class="lg:col-span-4 space-y-3">
+              ${gyms.map((g) => {
+                const count = athletes.filter((a) => a.salleId === g.id).length;
+                const active = g.id === currentGym.id;
+                return `
+                  <button type="button" onclick="selectGymToEdit('${g.id}')" class="w-full text-left p-4 rounded-2xl border transition ${
+                    active ? "bg-orange-500/15 border-orange-500/50 text-white" : "glass-card border-zinc-800 text-zinc-300 hover:border-zinc-700"
+                  }">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="font-extrabold text-sm text-white">${esc(g.nom)}</span>
+                      <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-zinc-900 text-amber-300">${g.machines?.length || 0} machines</span>
+                    </div>
+                    <p class="text-xs text-zinc-400 mt-1">${esc(g.ville || "")} • <strong class="text-orange-300">${count} athlète(s)</strong></p>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+
+            <div class="lg:col-span-8 glass-card rounded-3xl p-5 space-y-4 border border-zinc-800">
+              <div class="pb-3 border-b border-zinc-800">
+                <h3 class="text-base font-black text-white">${esc(currentGym.nom)}</h3>
+                <p class="text-xs text-zinc-400 mt-0.5">
+                  Athlètes rattachés : <strong class="text-amber-300">${assigned.length > 0 ? assigned.map((a) => a.nom).join(", ") : "Aucun athlète"}</strong>
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                ${MACHINES_REFERENTIEL.map((m) => {
+                  const checked = machinesSet.has(m);
+                  return `
+                    <label class="flex items-center justify-between gap-3 p-3.5 rounded-2xl border cursor-pointer transition ${
+                      checked ? "bg-emerald-500/10 border-emerald-500/40 text-white" : "bg-zinc-950 border-zinc-800 text-zinc-400"
+                    }">
+                      <span class="text-xs sm:text-sm font-bold">${esc(m)}</span>
+                      <input type="checkbox" ${checked ? "checked" : ""} onchange="toggleGymMachine('${currentGym.id}', '${esc(m)}')" class="h-5 w-5 rounded border-zinc-600 text-orange-500 cursor-pointer" />
+                    </label>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderCoachTrackingTab() {
+      const filtered = checkins.filter(
+        (c) => state.trackingFilterAthleteId === "all" || c.athleteId === state.trackingFilterAthleteId
+      );
+
+      return `
+        <section class="space-y-5">
+          <div class="glass-card rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-zinc-800">
+            <div>
+              <h2 class="text-lg font-black text-white">Suivi Biométrique & Check-ins (${filtered.length})</h2>
+              <p class="text-xs text-zinc-400 mt-0.5">Bilans hebdomadaires transmis par tes athlètes.</p>
+            </div>
+            <select onchange="setTrackingFilter(this.value)" class="px-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-xs sm:text-sm font-bold text-emerald-300">
+              <option value="all" ${state.trackingFilterAthleteId === "all" ? "selected" : ""}>Tous les athlètes (${athletes.length})</option>
+              ${athletes.map((a) => `<option value="${a.id}" ${state.trackingFilterAthleteId === a.id ? "selected" : ""}>${esc(a.nom)}</option>`).join("")}
             </select>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div class="bg-slate-950/75 border border-slate-800 rounded-2xl p-4 space-y-3">
-              <h3 class="text-sm font-bold text-sky-300 uppercase tracking-wider">Historique Biométrique</h3>
-              ${(selectedAth?.biometrics || []).slice().reverse().map((b) => `
-                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 text-xs space-y-1">
-                  <div class="flex justify-between font-bold text-slate-200">
-                    <span>${escapeHtml(b.date)}</span>
-                    <span class="text-emerald-300">${b.weightKg} kg ${b.bodyFatPct ? `• ${b.bodyFatPct}% MG` : ""}</span>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${filtered.map((chk) => {
+              const ath = athletes.find((a) => a.id === chk.athleteId);
+              const gym = ath ? getGym(ath.salleId) : null;
+              return `
+                <article class="glass-card rounded-3xl p-5 space-y-3 border border-zinc-800">
+                  <div class="flex items-center justify-between gap-2">
+                    <div>
+                      <h3 class="text-base font-extrabold text-white">${esc(ath?.nom || "Athlète")}</h3>
+                      <p class="text-xs text-zinc-400">${esc(gym?.nom || "")}</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-xl bg-zinc-900 text-xs font-bold text-zinc-300">${esc(chk.date)}</span>
                   </div>
-                  <p class="text-slate-400">Sommeil : ${b.sleepHours}h • ${escapeHtml(b.notes || "")}</p>
-                </div>
-              `).join("")}
-            </div>
 
-            <div class="bg-slate-950/75 border border-slate-800 rounded-2xl p-4 space-y-3">
-              <h3 class="text-sm font-bold text-emerald-300 uppercase tracking-wider">Logs Nutritionnels</h3>
-              ${(selectedAth?.nutritionLogs || []).slice().reverse().map((n) => `
-                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 text-xs space-y-1">
-                  <div class="flex justify-between font-bold text-slate-200">
-                    <span>${escapeHtml(n.date)}</span>
-                    <span class="text-sky-300">${n.calories} kcal</span>
+                  <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="px-3 py-1 rounded-xl bg-orange-500/15 text-orange-300 font-extrabold">${chk.poids} kg</span>
+                    <span class="px-3 py-1 rounded-xl bg-zinc-900 text-zinc-200 font-semibold">Taille ${chk.tourTaille} cm</span>
+                    <span class="px-3 py-1 rounded-xl bg-amber-500/15 text-amber-300 font-bold">Énergie ${chk.energie}/10</span>
+                    <span class="px-3 py-1 rounded-xl bg-emerald-500/15 text-emerald-300 font-bold">Nutrition ${chk.nutritionPct}%</span>
                   </div>
-                  <p class="text-slate-400">P: ${n.proteinG}g • G: ${n.carbsG}g • L: ${n.fatsG}g • Eau: ${n.waterL}L</p>
-                </div>
-              `).join("")}
-            </div>
+
+                  <p class="text-xs text-zinc-300 bg-zinc-950 p-3 rounded-2xl border border-zinc-800">« ${esc(chk.commentaire)} »</p>
+                </article>
+              `;
+            }).join("")}
           </div>
-        </div>
+        </section>
       `;
     }
 
     function renderAthleteDashboard() {
-      const ath = getAthleteById(session.athleteId);
-      const latestBio = ath.biometrics[ath.biometrics.length - 1];
-      const latestNut = ath.nutritionLogs[ath.nutritionLogs.length - 1];
+      const ath = athletes.find((a) => a.id === state.athleteId) || athletes[0];
+      if (!ath) return "";
+      const gym = getGym(ath.salleId);
+      const pct = getWorkoutProgress(ath);
 
       return `
-        <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 pb-28 space-y-6">
-          <!-- Athlete Header Card -->
-          <div class="glass-panel rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-sky-400">${escapeHtml(ath.sport)}</span>
-              <h1 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5">${escapeHtml(ath.name)}</h1>
-              <p class="text-xs sm:text-sm text-slate-400 mt-1">${escapeHtml(ath.objective)}</p>
+        <main class="flex-1 max-w-4xl w-full mx-auto px-4 pt-5 pb-28 space-y-6">
+          <div class="glass-card rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-zinc-800">
+            <div class="space-y-1">
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="font-extrabold uppercase tracking-wider text-amber-400">${esc(ath.objectif)}</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-orange-500/15 text-orange-300 border border-orange-500/35 font-bold">Salle : ${esc(gym.nom)}</span>
+              </div>
+              <h1 class="text-xl sm:text-2xl font-black text-white">Bonjour ${esc(ath.nom.split(" ")[0])}</h1>
+              <p class="text-xs text-zinc-400">Objectif nutritionnel : <strong class="text-zinc-200">${ath.caloriesCibles} kcal</strong> • <strong class="text-orange-300">${ath.proteinesCibles}g protéines</strong></p>
             </div>
-            <div class="flex gap-2">
-              <button type="button" onclick="setAthleteTab('workout')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.athleteActiveTab === 'workout' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
-                Séance & Repos
+
+            <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-zinc-950 border border-zinc-800 shrink-0">
+              <button type="button" onclick="setAthleteTab('workout')" class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition ${
+                state.athleteTab === "workout" ? "btn-gradient" : "text-zinc-300"
+              }">
+                Ma Séance (${pct}%)
               </button>
-              <button type="button" onclick="setAthleteTab('tracking')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.athleteActiveTab === 'tracking' ? 'bg-emerald-400 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
-                Biométrie & Nutrition
+              <button type="button" onclick="setAthleteTab('tracking')" class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition ${
+                state.athleteTab === "tracking" ? "btn-gradient" : "text-zinc-300"
+              }">
+                Mon Suivi
               </button>
             </div>
           </div>
 
-          ${session.athleteActiveTab === "workout"
-            ? renderAthleteWorkouts(ath)
-            : renderAthleteTracking(ath, latestBio, latestNut)}
+          ${state.athleteTab === "workout" ? renderAthleteWorkout(ath, gym, pct) : renderAthleteTracking(ath)}
         </main>
       `;
     }
 
-    window.setAthleteTab = function(tab) {
-      session.athleteActiveTab = tab;
-      render();
-    };
-
-    function renderAthleteWorkouts(ath) {
+    function renderAthleteWorkout(ath, gym, pct) {
+      const list = ath.exercices || [];
       return `
-        <div class="space-y-6">
-          ${ath.workouts.map((wk) => `
-            <section class="space-y-4">
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h2 class="text-lg font-extrabold text-white">${escapeHtml(wk.title)}</h2>
-                  <p class="text-xs text-slate-400">${escapeHtml(wk.focus)} • Repos auto : ${wk.restDefault}s par défaut</p>
-                </div>
-                <button type="button" onclick="commitLoggedLoads()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-sky-300 border border-slate-700 transition">
-                  Sauvegarder les charges
-                </button>
+        <section class="space-y-5">
+          <div class="glass-card rounded-3xl p-5 space-y-3 border border-orange-500/30">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span class="px-2.5 py-1 rounded-lg bg-orange-500/15 text-orange-300 text-[11px] font-bold">${esc(ath.seanceJour || "Séance du jour")}</span>
+                <h2 class="text-lg sm:text-xl font-black text-white mt-2">${esc(ath.seanceTitre)}</h2>
               </div>
+              <span class="text-sm font-black text-orange-400">${pct}% validé</span>
+            </div>
+            ${ath.seanceNotes ? `<p class="text-xs text-zinc-300">Consignes du coach : ${esc(ath.seanceNotes)}</p>` : ""}
+            <div class="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-300" style="width: ${pct}%;"></div>
+            </div>
+          </div>
 
-              <div class="space-y-4">
-                ${wk.exercises.map((ex) => {
-                  const completedArr = Array.from({ length: ex.setsCount }, (_, i) => Boolean(ex.completedSets?.[i]));
-                  const loadsArr = Array.from({ length: ex.setsCount }, (_, i) => ex.loggedLoads?.[i] || `${ex.loadHint} x ${ex.repsTarget}`);
-                  return `
-                    <article class="glass-panel rounded-2xl p-4 sm:p-5 space-y-4 border border-slate-800">
-                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div>
-                          <h3 class="text-base sm:text-lg font-bold text-white">${escapeHtml(ex.name)}</h3>
-                          <p class="text-xs text-slate-400 mt-0.5">${escapeHtml(ex.machine || "Matériel libre")} • Cible : <strong class="text-slate-200">${ex.setsCount} × ${escapeHtml(ex.repsTarget)}</strong> • Repos : <strong class="text-sky-300">${ex.restSec || wk.restDefault}s</strong></p>
-                        </div>
-                        <button type="button" onclick="openExerciseGuideModal('${ath.id}', '${wk.id}', '${ex.id}')" class="px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/35 text-xs font-bold text-sky-300 shrink-0 transition">
-                          Guide Machine & Vidéo
+          ${list.length === 0 ? `
+            <div class="glass-card rounded-3xl p-8 text-center text-xs text-zinc-400 border border-zinc-800">
+              Ton coach prépare ta prochaine séance pour <strong class="text-white">${esc(gym.nom)}</strong>.
+            </div>
+          ` : `
+            <div class="space-y-4">
+              ${list.map((item, exIdx) => {
+                const ex = getExerciseById(item.exId);
+                const count = Number(item.series) || 3;
+                const checks = Array.from({ length: count }, (_, i) => Boolean(item.faites?.[i]));
+
+                return `
+                  <article class="glass-card rounded-3xl p-4 sm:p-5 space-y-4 border border-zinc-800">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <h3 class="text-base sm:text-lg font-extrabold text-white">${esc(ex.nom)}</h3>
+                        <p class="text-xs text-zinc-400 mt-0.5">
+                          Machine : <strong class="text-zinc-200">${esc(ex.machine)}</strong> • <strong class="text-orange-300">${count} × ${esc(item.reps)}</strong> • Repos : <strong class="text-amber-300">${item.reposSec}s</strong>
+                        </p>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <input type="text" value="${esc(item.charge)}" onchange="updateAthleteSetLoad('${ath.id}', ${exIdx}, this.value)" aria-label="Charge utilisée" class="w-28 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-xs font-bold text-orange-300" />
+                        <button type="button" onclick="openExerciseGuideModal('${ex.id}')" class="px-3.5 py-2 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/40 text-xs font-extrabold text-orange-300 shrink-0">
+                          Guide & Vidéo
                         </button>
                       </div>
+                    </div>
 
-                      <!-- Quick Execution & Machine Tip Callout -->
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                        <div class="p-3 rounded-xl bg-slate-950/75 border border-slate-800/80">
-                          <span class="font-bold text-emerald-300 block mb-0.5">Exécution</span>
-                          <span class="text-slate-300 line-clamp-2">${escapeHtml(ex.executionTip)}</span>
-                        </div>
-                        <div class="p-3 rounded-xl bg-slate-950/75 border border-slate-800/80">
-                          <span class="font-bold text-sky-300 block mb-0.5">Réglage Machine</span>
-                          <span class="text-slate-300 line-clamp-2">${escapeHtml(ex.machineTip)}</span>
-                        </div>
-                      </div>
-
-                      <!-- Interactive Sets Checkmarks (Auto-starts rest timer when checked) -->
-                      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        ${completedArr.map((isDone, idx) => `
-                          <label class="flex items-center justify-between gap-2 p-3 rounded-xl border cursor-pointer transition ${isDone ? 'bg-emerald-500/15 border-emerald-400/40' : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'}">
-                            <div class="flex items-center gap-2.5 min-w-0">
-                              <input
-                                type="checkbox"
-                                ${isDone ? "checked" : ""}
-                                onchange="toggleAthleteSet('${ath.id}', '${wk.id}', '${ex.id}', ${idx})"
-                                class="set-checkbox h-5 w-5 rounded-md border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-400 shrink-0 cursor-pointer"
-                              />
-                              <div class="min-w-0">
-                                <span class="text-xs font-bold block ${isDone ? 'text-emerald-300' : 'text-slate-200'}">Série ${idx + 1}</span>
-                                <input
-                                  type="text"
-                                  value="${escapeHtml(loadsArr[idx])}"
-                                  onchange="updateLoggedLoad('${ath.id}', '${wk.id}', '${ex.id}', ${idx}, this.value)"
-                                  onclick="event.stopPropagation()"
-                                  class="w-full bg-transparent text-xs text-slate-400 focus:text-white focus:outline-none truncate"
-                                  aria-label="Charge série ${idx + 1}"
-                                />
-                              </div>
-                            </div>
-                          </label>
-                        `).join("")}
-                      </div>
-                    </article>
-                  `;
-                }).join("")}
-              </div>
-            </section>
-          `).join("")}
-        </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      ${checks.map((done, sIdx) => `
+                        <label class="flex items-center gap-2.5 p-3 rounded-2xl border cursor-pointer transition ${
+                          done ? "bg-orange-500/15 border-orange-500/50" : "bg-zinc-950 border-zinc-800 hover:border-zinc-700"
+                        }">
+                          <input type="checkbox" ${done ? "checked" : ""} onchange="toggleAthleteSet('${ath.id}', ${exIdx}, ${sIdx})" class="set-checkbox h-5 w-5 rounded-md border-zinc-600 bg-zinc-900 cursor-pointer" />
+                          <div class="min-w-0">
+                            <span class="text-xs font-extrabold block ${done ? "text-orange-300" : "text-zinc-200"}">Série ${sIdx + 1}</span>
+                            <span class="text-[11px] text-zinc-400 truncate block">${esc(item.reps)} reps</span>
+                          </div>
+                        </label>
+                      `).join("")}
+                    </div>
+                  </article>
+                `;
+              }).join("")}
+            </div>
+          `}
+        </section>
       `;
     }
 
-    function renderAthleteTracking(ath, latestBio, latestNut) {
-      const target = ath.nutritionTarget || { calories: 2900, proteinG: 170, carbsG: 320, fatsG: 80, waterL: 3.0 };
+    function renderAthleteTracking(ath) {
+      const myCheckins = checkins.filter((c) => c.athleteId === ath.id);
       return `
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <!-- Check-in Form -->
-          <form onsubmit="addAthleteCheckin(event, '${ath.id}')" class="lg:col-span-6 glass-panel rounded-2xl p-5 space-y-4">
-            <h2 class="text-base font-bold text-white">Nouveau Check-in Biométrique & Nutritionnel</h2>
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <form onsubmit="submitAthleteCheckin(event, '${ath.id}')" class="lg:col-span-6 glass-card rounded-3xl p-5 space-y-4 border border-zinc-800">
+            <h2 class="text-base font-extrabold text-white">Envoyer mon bilan au coach</h2>
 
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs text-slate-400 mb-1">Poids (kg)</label>
-                <input id="checkin-weight" type="number" step="0.1" value="${latestBio?.weightKg ?? 78.0}" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+                <label class="block text-[11px] text-zinc-400 mb-1">Poids (kg)</label>
+                <input id="chk-poids" type="number" step="0.1" value="${ath.poidsActuel}" required class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-sm font-bold text-white" />
               </div>
               <div>
-                <label class="block text-xs text-slate-400 mb-1">% MG</label>
-                <input id="checkin-bf" type="number" step="0.1" value="${latestBio?.bodyFatPct ?? 13.0}" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+                <label class="block text-[11px] text-zinc-400 mb-1">Tour de taille (cm)</label>
+                <input id="chk-taille" type="number" step="0.5" value="${ath.tourTaille}" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
               </div>
               <div>
-                <label class="block text-xs text-slate-400 mb-1">Sommeil (h)</label>
-                <input id="checkin-sleep" type="number" step="0.1" value="${latestBio?.sleepHours ?? 7.8}" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+                <label class="block text-[11px] text-zinc-400 mb-1">Niveau d'énergie (1-10)</label>
+                <input id="chk-energie" type="number" min="1" max="10" value="8" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-sm font-bold text-amber-300" />
+              </div>
+              <div>
+                <label class="block text-[11px] text-zinc-400 mb-1">Respect nutritionnel (%)</label>
+                <input id="chk-nutri" type="number" min="0" max="100" value="90" class="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-sm font-bold text-emerald-300" />
               </div>
             </div>
 
             <div>
-              <label class="block text-xs text-slate-400 mb-1">Ressenti / Notes biométriques</label>
-              <input id="checkin-notes" type="text" placeholder="Énergie, courbatures, récupération..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              <label class="block text-[11px] text-zinc-400 mb-1">Commentaire / Sensations</label>
+              <input id="chk-comment" type="text" placeholder="Forme du jour, sensations sur les exercices..." class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-sm text-white" />
             </div>
 
-            <div class="pt-2 border-t border-slate-800">
-              <p class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2.5">Apports Nutritionnels du Jour (Cible : ${target.calories} kcal)</p>
-              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                <div>
-                  <label class="block text-[11px] text-slate-400 mb-1">Kcal</label>
-                  <input id="nut-calories" type="number" value="${latestNut?.calories ?? target.calories}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
-                </div>
-                <div>
-                  <label class="block text-[11px] text-slate-400 mb-1">Prot (g)</label>
-                  <input id="nut-protein" type="number" value="${latestNut?.proteinG ?? target.proteinG}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
-                </div>
-                <div>
-                  <label class="block text-[11px] text-slate-400 mb-1">Gluc (g)</label>
-                  <input id="nut-carbs" type="number" value="${latestNut?.carbsG ?? target.carbsG}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
-                </div>
-                <div>
-                  <label class="block text-[11px] text-slate-400 mb-1">Lip (g)</label>
-                  <input id="nut-fats" type="number" value="${latestNut?.fatsG ?? target.fatsG}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
-                </div>
-                <div>
-                  <label class="block text-[11px] text-slate-400 mb-1">Eau (L)</label>
-                  <input id="nut-water" type="number" step="0.1" value="${latestNut?.waterL ?? target.waterL}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
-                </div>
-              </div>
-            </div>
-
-            <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-400 to-emerald-400 text-slate-950 font-extrabold text-sm transition">
-              Enregistrer mon check-in
+            <button type="submit" class="w-full py-3.5 rounded-xl btn-gradient font-black text-sm shadow-lg shadow-orange-500/20">
+              Envoyer mon bilan
             </button>
           </form>
 
-          <!-- Recent Logs Summary -->
-          <div class="lg:col-span-6 space-y-4">
-            <div class="glass-panel rounded-2xl p-5 space-y-3">
-              <h3 class="text-sm font-bold text-sky-300 uppercase tracking-wider">Derniers relevés biométriques</h3>
-              ${ath.biometrics.slice().reverse().slice(0, 4).map((b) => `
-                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs">
-                  <div>
-                    <p class="font-bold text-white">${escapeHtml(b.date)} — ${b.weightKg} kg</p>
-                    <p class="text-slate-400">${escapeHtml(b.notes || "")}</p>
-                  </div>
-                  <span class="text-emerald-300 font-semibold">${b.sleepHours}h sommeil</span>
+          <div class="lg:col-span-6 glass-card rounded-3xl p-5 space-y-3 border border-zinc-800">
+            <h3 class="text-sm font-extrabold text-white">Historique personnel (${myCheckins.length})</h3>
+            ${myCheckins.map((c) => `
+              <div class="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-xs space-y-1">
+                <div class="flex justify-between items-center">
+                  <strong class="text-white">${esc(c.date)} • <span class="text-orange-300">${c.poids} kg</span></strong>
+                  <span class="px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-300 font-bold">Énergie ${c.energie}/10 • Nutri ${c.nutritionPct}%</span>
                 </div>
-              `).join("")}
-            </div>
-
-            <div class="glass-panel rounded-2xl p-5 space-y-3">
-              <h3 class="text-sm font-bold text-emerald-300 uppercase tracking-wider">Derniers logs nutritionnels</h3>
-              ${ath.nutritionLogs.slice().reverse().slice(0, 4).map((n) => `
-                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs">
-                  <div>
-                    <p class="font-bold text-white">${escapeHtml(n.date)} — ${n.calories} kcal</p>
-                    <p class="text-slate-400">Prot ${n.proteinG}g • Gluc ${n.carbsG}g • Lip ${n.fatsG}g</p>
-                  </div>
-                  <span class="text-sky-300 font-semibold">${n.waterL}L eau</span>
-                </div>
-              `).join("")}
-            </div>
+                <p class="text-zinc-400">${esc(c.commentaire)}</p>
+              </div>
+            `).join("")}
           </div>
-        </div>
+        </section>
       `;
     }
 
@@ -1414,22 +2444,118 @@
       const root = document.getElementById("app");
       if (!root) return;
 
-      let screenHtml = "";
-      if (!session.role) {
-        screenHtml = renderLoginScreen();
-      } else if (session.role === "coach") {
-        screenHtml = renderCoachDashboard();
+      let screen = "";
+      if (!state.role) {
+        screen = renderLoginScreen();
+      } else if (state.role === "coach") {
+        screen = renderCoachDashboard();
       } else {
-        screenHtml = renderAthleteDashboard();
+        screen = renderAthleteDashboard();
       }
 
-      root.innerHTML = renderTopBar() + screenHtml;
-      updateConnectionBadge();
+      root.innerHTML = renderHeader() + screen;
     }
 
-    // Boot application & connect Firestore
+    // Exposition propre pour la synchronisation Firestore non bloquante
+    window.__BTRAINING__ = {
+      state,
+      render,
+      ensureDefaultAccountsPresent,
+      getData: () => ({ gyms, exercisesCatalog, athletes, checkins }),
+      setGyms: (arr) => {
+        if (Array.isArray(arr) && arr.length > 0) {
+          gyms = arr;
+          safeSetStorage(STORAGE_KEYS.GYMS, JSON.stringify(gyms));
+          render();
+        }
+      },
+      setExercises: (arr) => {
+        if (Array.isArray(arr) && arr.length > 0) {
+          exercisesCatalog = arr;
+          safeSetStorage(STORAGE_KEYS.EXERCISES, JSON.stringify(exercisesCatalog));
+          render();
+        }
+      },
+      setAthletes: (arr) => {
+        if (Array.isArray(arr) && arr.length > 0) {
+          athletes = arr;
+          ensureDefaultAccountsPresent();
+          safeSetStorage(STORAGE_KEYS.ATHLETES, JSON.stringify(athletes));
+          render();
+        }
+      },
+      setCheckins: (arr) => {
+        if (Array.isArray(arr) && arr.length > 0) {
+          checkins = arr;
+          safeSetStorage(STORAGE_KEYS.CHECKINS, JSON.stringify(checkins));
+          render();
+        }
+      }
+    };
+
+    // RENDU IMMÉDIAT GARANTI
     render();
-    initFirebaseSync();
+  </script>
+
+  <!-- SYNCHRONISATION FIREBASE FIRESTORE NON BLOQUANTE EN ARRIÈRE-PLAN -->
+  <script type="module">
+    async function initFirestoreInBackground() {
+      try {
+        const [{ initializeApp }, { getFirestore, collection, doc, setDoc, getDocs, onSnapshot }] = await Promise.all([
+          import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
+        ]);
+
+        const app = initializeApp(window.BTRAINING_FIREBASE_CONFIG);
+        const db = getFirestore(app);
+
+        window.firebaseSync = {
+          save: async function(collectionName, docId, payload) {
+            try {
+              await setDoc(doc(db, collectionName, docId), payload, { merge: true });
+            } catch (err) {}
+          }
+        };
+
+        const initial = window.__BTRAINING__.getData();
+        const seedIfEmpty = async (colName, items) => {
+          const snap = await getDocs(collection(db, colName));
+          if (snap.empty) {
+            for (const item of items) {
+              await setDoc(doc(db, colName, item.id), item);
+            }
+          }
+        };
+
+        await Promise.all([
+          seedIfEmpty("gyms", initial.gyms),
+          seedIfEmpty("exercises", initial.exercisesCatalog),
+          seedIfEmpty("athletes", initial.athletes),
+          seedIfEmpty("checkins", initial.checkins)
+        ]);
+
+        onSnapshot(collection(db, "gyms"), (snap) => {
+          if (!snap.empty) window.__BTRAINING__.setGyms(snap.docs.map((d) => d.data()));
+        });
+        onSnapshot(collection(db, "exercises"), (snap) => {
+          if (!snap.empty) window.__BTRAINING__.setExercises(snap.docs.map((d) => d.data()));
+        });
+        onSnapshot(collection(db, "athletes"), (snap) => {
+          if (!snap.empty) window.__BTRAINING__.setAthletes(snap.docs.map((d) => d.data()));
+        });
+        onSnapshot(collection(db, "checkins"), (snap) => {
+          if (!snap.empty) window.__BTRAINING__.setCheckins(snap.docs.map((d) => d.data()));
+        });
+
+        window.__BTRAINING__.state.firestoreLive = true;
+        window.__BTRAINING__.render();
+      } catch (e) {
+        // Repli propre sur le mode local déjà rendu
+        window.__BTRAINING__.state.firestoreLive = false;
+      }
+    }
+
+    initFirestoreInBackground();
   </script>
 </body>
 </html>
