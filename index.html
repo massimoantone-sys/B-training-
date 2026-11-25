@@ -2,1161 +2,1434 @@
 <html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>B training — Coaching & Suivi Athlétique</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B training — Coaching & Performance</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    // Configure Tailwind CSS with dark athletic palette and Inter font
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            obsidian: '#090d16',
+            card: '#111827',
+            cardElevated: '#172033',
+            accent: '#38bdf8',
+            accentEmerald: '#10b981',
+            accentAmber: '#f59e0b',
+          },
+        },
+      },
+    };
+  </script>
   <style>
-    * { -webkit-tap-highlight-color: transparent; }
-    body { background-color: #090d16; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+    /* Custom scrollbar and subtle athletic glassmorphism helpers */
+    body {
+      background-color: #090d16;
+      color: #f8fafc;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .set-checkbox:checked {
+      background-color: #10b981;
+      border-color: #10b981;
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.65; }
+    }
+
+    .animate-pulse-soft {
+      animation: pulseSoft 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
   </style>
 </head>
-<body class="min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+<body class="min-h-screen bg-obsidian text-slate-100 antialiased selection:bg-sky-500/30 selection:text-sky-200">
+  <!-- Main Application Root -->
+  <div id="app" class="min-h-screen flex flex-col"></div>
 
-  <div id="app"></div>
+  <!-- Toast / Non-blocking Alert Banner -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-3 sm:px-0"></div>
 
-  <!-- MODALE DÉMO MOUVEMENT & MACHINE -->
-  <div id="demoModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-    <div class="w-full max-w-lg rounded-2xl border border-slate-800 bg-[#0f172a] p-5 shadow-2xl">
-      <div class="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
-        <div>
-          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Démonstration Mouvement & Machine</span>
-          <h3 id="demoTitle" class="text-xl font-bold text-white mt-0.5">Exercice</h3>
-          <p id="demoMachine" class="text-xs text-slate-400 mt-1">Matériel :</p>
+  <!-- Modal Container for Exercise Video / Machine Execution Guide & Editing -->
+  <div id="modal-backdrop" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div id="modal-card" class="glass-panel rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl border border-slate-700/70"></div>
+  </div>
+
+  <!-- Floating Rest Timer Bar (Athlete Mode) -->
+  <div id="rest-timer-widget" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 hidden w-[94%] max-w-md glass-panel rounded-2xl p-4 shadow-2xl border border-sky-400/35">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="h-11 w-11 rounded-xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center shrink-0">
+          <span id="timer-countdown" class="text-sm font-extrabold text-sky-300 tabular-nums">01:30</span>
         </div>
-        <button onclick="closeDemoModal()" class="rounded-xl bg-slate-800 p-2 text-slate-300 hover:bg-slate-700 hover:text-white">✕</button>
+        <div class="min-w-0">
+          <p class="text-xs uppercase tracking-wider text-sky-400 font-semibold">Temps de repos actif</p>
+          <p id="timer-context" class="text-sm font-medium text-slate-200 truncate">Série validée • Récupération</p>
+        </div>
       </div>
-
-      <div id="demoVideoContainer" class="mt-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-950"></div>
-
-      <div class="mt-4 rounded-xl border border-slate-800 bg-slate-900/70 p-3.5">
-        <p class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">Points clés d'exécution</p>
-        <ol id="demoTips" class="space-y-1.5 text-sm text-slate-300 list-decimal list-inside"></ol>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button type="button" onclick="adjustRestTimer(-15)" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition" title="-15s">-15s</button>
+        <button type="button" onclick="adjustRestTimer(15)" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition" title="+15s">+15s</button>
+        <button type="button" onclick="stopRestTimer()" class="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 text-xs font-bold text-emerald-300 transition">Passer</button>
       </div>
-
-      <button onclick="closeDemoModal()" class="mt-4 w-full rounded-xl bg-emerald-500 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 transition">
-        Fermer et reprendre la séance
-      </button>
+    </div>
+    <div class="mt-3 h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+      <div id="timer-progress-bar" class="h-full bg-gradient-to-r from-sky-400 to-emerald-400 transition-all duration-300" style="width: 100%;"></div>
     </div>
   </div>
 
-  <!-- BANDEAU CHRONO DE REPOS AUTOMATIQUE -->
-  <div id="restTimerBar" class="fixed bottom-0 inset-x-0 z-40 hidden border-t border-emerald-500/40 bg-[#0c1424]/95 backdrop-blur-md px-4 py-3 shadow-2xl">
-    <div class="mx-auto max-w-2xl flex items-center justify-between gap-3">
-      <div class="min-w-0">
-        <div class="flex items-center gap-2">
-          <span class="inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Repos en cours</span>
-        </div>
-        <p id="restExerciseName" class="truncate text-xs text-slate-300 mt-0.5">Récupération</p>
-      </div>
-
-      <div class="flex items-center gap-2 shrink-0">
-        <button onclick="adjustRest(-15)" class="rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700">-15s</button>
-        <div id="restClock" class="min-w-[74px] text-center font-mono text-2xl font-extrabold text-emerald-400">01:30</div>
-        <button onclick="adjustRest(15)" class="rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700">+15s</button>
-        <button onclick="stopRestTimer()" class="rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs font-bold text-rose-400 hover:bg-slate-700">Passer</button>
-      </div>
-    </div>
-    <div class="mx-auto max-w-2xl mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-      <div id="restProgress" class="h-full bg-emerald-500 transition-all duration-300" style="width: 100%"></div>
-    </div>
-  </div>
-
+  <!-- Firebase Modular SDK + Complete B training Logic -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // =========================================================================
-    // 1. COLLE TA CONFIG FIREBASE ICI (depuis Console Firebase > Paramètres)
-    // =========================================================================
+    // -------------------------------------------------------------------------
+    // 1. FIREBASE FIRESTORE CONFIGURATION (Project: b-training-2ee96)
+    // -------------------------------------------------------------------------
     const firebaseConfig = {
-      apiKey: "COLLE_TON_API_KEY_ICI",
-      authDomain: "TON_PROJET.firebaseapp.com",
-      projectId: "TON_PROJECT_ID",
-      storageBucket: "TON_PROJET.appspot.com",
-      messagingSenderId: "TON_SENDER_ID",
-      appId: "TON_APP_ID"
+      apiKey: "AIzaSyAI00Bq3tbseZD91t9LxmiuirmI1D3ppCM",
+      authDomain: "b-training-2ee96.firebaseapp.com",
+      projectId: "b-training-2ee96",
+      storageBucket: "b-training-2ee96.firebasestorage.app",
+      messagingSenderId: "258466920442",
+      appId: "1:258466920442:web:010020289d2e6152e15643",
+      measurementId: "G-9DWVF721BP"
     };
 
-    const isFirebaseConfigured = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("COLLE_TON");
-    let db = null;
-    const STATE_DOC_PATH = ["btraining_app", "main_state"];
+    const LOCAL_STORAGE_KEY = "b_training_state_v1";
+    const FIRESTORE_DOC_PATH = ["b_training_app", "main_state"];
 
-    // =========================================================================
-    // 2. DONNÉES INITIALES PAR DÉFAUT
-    // =========================================================================
+    // Initial seed data so the app works richly out-of-the-box
     const DEFAULT_STATE = {
-      coachAuth: {
-        email: "coach@btraining.fr",
-        password: "admin"
-      },
-      exercises: [
+      athletes: [
         {
-          id: "ex1",
-          name: "Développé couché barre",
-          muscle: "Pectoraux",
-          machine: "Banc plat olympique + Barre 20kg",
-          videoUrl: "https://www.youtube.com/watch?v=rT7DgCr-3pg",
-          tips: [
-            "Resserre les omoplates sur le banc et garde les pieds ancrés au sol.",
-            "Descends la barre au niveau du bas des pectoraux en contrôlant 2 secondes.",
-            "Expire en poussant la barre sans décoller les fessiers."
-          ]
-        },
-        {
-          id: "ex2",
-          name: "Tirage vertical poulie haute",
-          muscle: "Dos",
-          machine: "Poste poulie haute + Barre large",
-          videoUrl: "https://www.youtube.com/watch?v=CAwf7n6Luuc",
-          tips: [
-            "Bloque les cuisses sous les boudins et sors la poitrine.",
-            "Tire la barre vers le haut des pectoraux en abaissant les épaules.",
-            "Contrôle la remontée jusqu'à l'étirement complet des dorsaux."
-          ]
-        },
-        {
-          id: "ex3",
-          name: "Presse à cuisses inclinée",
-          muscle: "Jambes",
-          machine: "Presse à cuisses 45°",
-          videoUrl: "https://www.youtube.com/watch?v=IZxyjW7MPJQ",
-          tips: [
-            "Place les pieds largeur d'épaules au milieu du plateau.",
-            "Descends jusqu'à 90° de flexion sans décoller le bas du dos.",
-            "Pousse dans les talons sans verrouiller complètement les genoux en haut."
-          ]
-        },
-        {
-          id: "ex4",
-          name: "Élévations latérales haltères",
-          muscle: "Épaules",
-          machine: "Paire d'haltères",
-          videoUrl: "https://www.youtube.com/watch?v=3VcKaXpzqRo",
-          tips: [
-            "Garde les coudes légèrement fléchis et le buste fixe.",
-            "Monte les bras jusqu'à l'horizontale sans hausser les trapèzes.",
-            "Freine la descente sur 2 secondes."
-          ]
-        }
-      ],
-      clients: [
-        {
-          id: "c1",
-          name: "Lucas Moreau",
+          id: "ath_lucas",
           code: "LUCAS-2026",
-          active: true,
-          goal: "Prise de muscle sec",
-          weight: 81.5,
-          targetWeight: 85,
-          weightHistory: [
-            { date: "Sem 1", val: 79.8 },
-            { date: "Sem 2", val: 80.4 },
-            { date: "Sem 3", val: 81.0 },
-            { date: "Sem 4", val: 81.5 }
+          name: "Lucas Moreau",
+          sport: "Hypertrophie & Force Athlétique",
+          objective: "Prise de masse propre +8kg & progression Bench/Squat",
+          status: "Actif",
+          workouts: [
+            {
+              id: "wk_upper_a",
+              title: "Séance A — Haut du Corps & Push",
+              focus: "Pectoraux, Épaules, Triceps",
+              restDefault: 90,
+              exercises: [
+                {
+                  id: "ex_bench",
+                  name: "Développé Couché Barre",
+                  machine: "Banc olympique + Barre 20kg + Pare-barres réglés",
+                  setsCount: 4,
+                  repsTarget: "8-10 reps",
+                  loadHint: "82.5 kg",
+                  restSec: 120,
+                  videoUrl: "https://www.youtube.com/watch?v=rT7DgCr-3pg",
+                  executionTip: "Omoplates rétractées et ancrées dans le banc, pieds à plat au sol, descente contrôlée (3s) vers le bas des pectoraux sans rebond.",
+                  machineTip: "Vérifie les crochets de sécurité juste sous la ligne thoracique basse et aligne le centre de la barre avec le nez avant de décrocher.",
+                  completedSets: [true, true, false, false],
+                  loggedLoads: ["82.5kg x 9", "82.5kg x 8", "82.5kg x ?", "82.5kg x ?"]
+                },
+                {
+                  id: "ex_incline_db",
+                  name: "Développé Incliné Haltères",
+                  machine: "Banc incliné à 30° + Paire d'haltères",
+                  setsCount: 3,
+                  repsTarget: "10-12 reps",
+                  loadHint: "30 kg / main",
+                  restSec: 90,
+                  videoUrl: "https://www.youtube.com/watch?v=8iPEnn-ltC8",
+                  executionTip: "Coudes à ~45° du buste, léger rapprochement des haltères en haut sans claquer les poids.",
+                  machineTip: "Règle l'inclinaison sur 30° (pas 45°+) pour cibler le faisceau claviculaire des pectoraux sans surcharger l'avant de l'épaule.",
+                  completedSets: [false, false, false],
+                  loggedLoads: ["30kg x ?", "30kg x ?", "30kg x ?"]
+                },
+                {
+                  id: "ex_cable_fly",
+                  name: "Écarté Poulie Vis-à-Vis",
+                  machine: "Station poulies doubles (réglage bas/médian)",
+                  setsCount: 3,
+                  repsTarget: "12-15 reps",
+                  loadHint: "17.5 kg / côté",
+                  restSec: 75,
+                  videoUrl: "https://www.youtube.com/watch?v=Iwe6AmxVf7o",
+                  executionTip: "Légère flexion fixe des coudes, arc de cercle ample et contraction isométrique 1s en fin de mouvement.",
+                  machineTip: "Place les poulies au niveau du bassin ou légèrement plus bas et avance d'un pas pour garder une tension continue en étirement.",
+                  completedSets: [false, false, false],
+                  loggedLoads: ["17.5kg x ?", "17.5kg x ?", "17.5kg x ?"]
+                }
+              ]
+            },
+            {
+              id: "wk_lower_b",
+              title: "Séance B — Bas du Corps & Chaîne Postérieure",
+              focus: "Quadriceps, Ischios, Gainage",
+              restDefault: 120,
+              exercises: [
+                {
+                  id: "ex_hack_squat",
+                  name: "Hack Squat Machine",
+                  machine: "Hack Squat guidé à charge libre",
+                  setsCount: 4,
+                  repsTarget: "8-12 reps",
+                  loadHint: "140 kg",
+                  restSec: 120,
+                  videoUrl: "https://www.youtube.com/watch?v=0tn5K9NlCvs",
+                  executionTip: "Bas du dos et tête collés au dossier, descendez jusqu'à ce que les cuisses passent sous la parallèle.",
+                  machineTip: "Place les pieds plus haut sur le plateau pour recruter davantage les fessiers/ischios, ou plus bas pour accentuer les quadriceps.",
+                  completedSets: [false, false, false, false],
+                  loggedLoads: ["140kg x ?", "140kg x ?", "140kg x ?", "140kg x ?"]
+                }
+              ]
+            }
           ],
-          nutrition: {
-            calories: 2750,
-            protein: 175,
-            carbs: 320,
-            fats: 75,
-            meals: "Petit-déj : 100g flocons d'avoine + 30g whey + 1 banane\nDéjeuner : 180g poulet + 250g riz basmati + légumes verts\nCollation : 200g fromage blanc 0% + 25g amandes\nDîner : 180g saumon/colin + 250g patate douce"
-          },
-          workoutName: "Upper Body — Force & Hypertrophie",
-          workoutItems: [
-            { uid: "w1", exerciseId: "ex1", sets: 4, reps: "8-10", rest: 90, load: "75 kg", completedSets: [false, false, false, false] },
-            { uid: "w2", exerciseId: "ex2", sets: 4, reps: "10-12", rest: 75, load: "60 kg", completedSets: [false, false, false, false] },
-            { uid: "w3", exerciseId: "ex4", sets: 3, reps: "12-15", rest: 60, load: "12 kg", completedSets: [false, false, false] }
-          ]
+          biometrics: [
+            { id: "bio_1", date: "2026-11-10", weightKg: 78.4, bodyFatPct: 12.8, sleepHours: 7.5, rhrBpm: 56, notes: "Bonne énergie, reprise cycle force" },
+            { id: "bio_2", date: "2026-11-17", weightKg: 79.0, bodyFatPct: 12.6, sleepHours: 8.0, rhrBpm: 54, notes: "+1 rep sur le développé couché" },
+            { id: "bio_3", date: "2026-11-24", weightKg: 79.5, bodyFatPct: 12.4, sleepHours: 7.8, rhrBpm: 53, notes: "Récupération optimale" }
+          ],
+          nutritionLogs: [
+            { id: "nut_1", date: "2026-11-24", calories: 3150, proteinG: 178, carbsG: 365, fatsG: 86, waterL: 3.2, adherencePct: 95 },
+            { id: "nut_2", date: "2026-11-25", calories: 3080, proteinG: 182, carbsG: 345, fatsG: 84, waterL: 3.0, adherencePct: 92 }
+          ],
+          nutritionTarget: { calories: 3100, proteinG: 180, carbsG: 350, fatsG: 85, waterL: 3.0 }
         },
         {
-          id: "c2",
-          name: "Chloé Bernard",
+          id: "ath_chloe",
           code: "CHLOE-2026",
-          active: true,
-          goal: "Perte de masse grasse & Tonification",
-          weight: 64.2,
-          targetWeight: 59,
-          weightHistory: [
-            { date: "Sem 1", val: 66.0 },
-            { date: "Sem 2", val: 65.3 },
-            { date: "Sem 3", val: 64.8 },
-            { date: "Sem 4", val: 64.2 }
+          name: "Chloé Delacroix",
+          sport: "Running Trail & Renforcement",
+          objective: "Prépa 25km Trail + stabilité articulaire",
+          status: "Actif",
+          workouts: [
+            {
+              id: "wk_chloe_1",
+              title: "Renforcement Trail & Stabilité",
+              focus: "Fessiers moyens, Chevilles, Core",
+              restDefault: 60,
+              exercises: [
+                {
+                  id: "ex_rdl",
+                  name: "Soulevé de Terre Roumain Haltères",
+                  machine: "Paire d'haltères + Tapis antidérapant",
+                  setsCount: 3,
+                  repsTarget: "10-12 reps",
+                  loadHint: "22 kg / main",
+                  restSec: 90,
+                  videoUrl: "https://www.youtube.com/watch?v=7j-2w4-GuEM",
+                  executionTip: "Hanches poussées vers l'arrière, dos neutre, haltères frôlant les cuisses jusqu'à l'étirement des ischios.",
+                  machineTip: "Évite de cambrer excessivement le bas du dos en fin de descente ; stoppe dès que le bassin amorce une rétroversion.",
+                  completedSets: [true, false, false],
+                  loggedLoads: ["22kg x 12", "22kg x ?", "22kg x ?"]
+                }
+              ]
+            }
           ],
-          nutrition: {
-            calories: 1750,
-            protein: 130,
-            carbs: 165,
-            fats: 55,
-            meals: "Petit-déj : 2 œufs brouillés + 2 tranches pain complet\nDéjeuner : 150g blanc de dinde + 150g quinoa + crudités\nDîner : 150g cabillaud + poêlée de courgettes"
-          },
-          workoutName: "Full Body Tonique",
-          workoutItems: [
-            { uid: "w4", exerciseId: "ex3", sets: 4, reps: "12", rest: 75, load: "90 kg", completedSets: [false, false, false, false] },
-            { uid: "w5", exerciseId: "ex2", sets: 3, reps: "12", rest: 60, load: "35 kg", completedSets: [false, false, false] }
-          ]
+          biometrics: [
+            { id: "bio_c1", date: "2026-11-22", weightKg: 58.2, bodyFatPct: 18.5, sleepHours: 8.2, rhrBpm: 50, notes: "Sortie longue sans douleur genou" }
+          ],
+          nutritionLogs: [
+            { id: "nut_c1", date: "2026-11-25", calories: 2350, proteinG: 125, carbsG: 270, fatsG: 68, waterL: 2.5, adherencePct: 90 }
+          ],
+          nutritionTarget: { calories: 2400, proteinG: 125, carbsG: 280, fatsG: 70, waterL: 2.5 }
         }
       ]
     };
 
-    // =========================================================================
-    // 3. ÉTAT LOCAL + SYNCHRONISATION FIRESTORE
-    // =========================================================================
-    let state = JSON.parse(localStorage.getItem("btraining_state_v1")) || structuredClone(DEFAULT_STATE);
-    let session = JSON.parse(localStorage.getItem("btraining_session_v1")) || null;
-    // session = { role: 'coach' } ou { role: 'client', clientId: 'c1', previewByCoach: false }
+    // -------------------------------------------------------------------------
+    // 2. APPLICATION STATE & FIRESTORE REAL-TIME SYNC WITH LOCAL FALLBACK
+    // -------------------------------------------------------------------------
+    let appState = loadLocalState();
+    let db = null;
+    let firestoreConnected = false;
+    let unsubscribeSnapshot = null;
 
-    let loginTab = "client";
-    let coachTab = "clients"; // 'clients' | 'program' | 'library' | 'security'
-    let selectedClientId = state.clients[0]?.id || null;
-    let clientTab = "workout"; // 'workout' | 'nutrition' | 'progress'
-    let syncStatus = isFirebaseConfigured ? "Connexion Firestore..." : "Mode Local (ajoute ta config Firebase pour la sync)";
+    let session = {
+      role: null, // 'coach' | 'athlete' | null
+      athleteId: null,
+      coachActiveTab: "athletes", // 'athletes' | 'workouts' | 'tracking'
+      selectedCoachAthleteId: "ath_lucas",
+      athleteActiveTab: "workout" // 'workout' | 'tracking'
+    };
 
-    async function saveState() {
-      localStorage.setItem("btraining_state_v1", JSON.stringify(state));
+    // Rest Timer State
+    let timerInterval = null;
+    let timerRemaining = 0;
+    let timerTotal = 90;
+
+    function loadLocalState() {
+      try {
+        const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.athletes) && parsed.athletes.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (err) {
+        console.warn("LocalStorage lecture impossible :", err);
+      }
+      return structuredClone(DEFAULT_STATE);
+    }
+
+    function saveLocalState(nextState) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(nextState));
+      } catch (err) {
+        console.warn("LocalStorage écriture impossible :", err);
+      }
+    }
+
+    async function persistState(nextState) {
+      appState = nextState;
+      saveLocalState(nextState);
+      render();
+
       if (db) {
         try {
-          syncStatus = "Synchronisation...";
-          renderSyncBadge();
-          await setDoc(doc(db, ...STATE_DOC_PATH), state);
-          syncStatus = "Firestore connecté • Synchronisé";
-          renderSyncBadge();
+          const docRef = doc(db, FIRESTORE_DOC_PATH[0], FIRESTORE_DOC_PATH[1]);
+          await setDoc(docRef, {
+            athletes: nextState.athletes,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+          if (!firestoreConnected) {
+            firestoreConnected = true;
+            updateConnectionBadge();
+          }
         } catch (err) {
-          console.error("Erreur Firestore:", err);
-          syncStatus = "Erreur sync Firestore (vérifie les règles)";
-          renderSyncBadge();
+          console.warn("Écriture Firestore en attente / indisponible, repli local actif :", err.message);
         }
       }
     }
 
-    function saveSession() {
-      if (session) localStorage.setItem("btraining_session_v1", JSON.stringify(session));
-      else localStorage.removeItem("btraining_session_v1");
-    }
-
-    async function initFirestore() {
-      if (!isFirebaseConfigured) return;
+    function initFirebaseSync() {
       try {
         const app = initializeApp(firebaseConfig);
         db = getFirestore(app);
-        const ref = doc(db, ...STATE_DOC_PATH);
+        const docRef = doc(db, FIRESTORE_DOC_PATH[0], FIRESTORE_DOC_PATH[1]);
 
-        const snap = await getDoc(ref);
-        if (!snap.exists()) {
-          await setDoc(ref, state);
-        } else {
-          state = snap.data();
-          localStorage.setItem("btraining_state_v1", JSON.stringify(state));
-        }
-
-        syncStatus = "Firestore connecté • Temps réel actif";
-        render();
-
-        onSnapshot(ref, (docSnap) => {
-          if (docSnap.exists()) {
-            state = docSnap.data();
-            localStorage.setItem("btraining_state_v1", JSON.stringify(state));
-            if (!state.clients.find(c => c.id === selectedClientId)) {
-              selectedClientId = state.clients[0]?.id || null;
-            }
-            render();
+        // Seed initial document if collection/doc doesn't exist yet
+        getDoc(docRef).then((snap) => {
+          if (!snap.exists()) {
+            setDoc(docRef, {
+              athletes: appState.athletes,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }).catch((err) => console.warn("Initialisation document Firestore :", err.message));
           }
-        });
+        }).catch((err) => console.warn("Lecture initiale Firestore :", err.message));
+
+        // Real-time listener
+        unsubscribeSnapshot = onSnapshot(
+          docRef,
+          (snapshot) => {
+            firestoreConnected = true;
+            updateConnectionBadge();
+            if (snapshot.exists()) {
+              const data = snapshot.data();
+              if (Array.isArray(data.athletes) && data.athletes.length > 0) {
+                appState = { ...appState, athletes: data.athletes };
+                saveLocalState(appState);
+                render();
+              }
+            }
+          },
+          (error) => {
+            console.warn("Firestore snapshot fallback (Mode Local) :", error.message);
+            firestoreConnected = false;
+            updateConnectionBadge();
+          }
+        );
       } catch (err) {
-        console.error(err);
-        syncStatus = "Erreur connexion Firebase (config invalide)";
-        render();
+        console.warn("Firebase init error, Mode Local actif :", err.message);
+        firestoreConnected = false;
+        updateConnectionBadge();
       }
     }
 
-    function renderSyncBadge() {
-      const el = document.getElementById("syncBadge");
-      if (el) el.textContent = syncStatus;
+    function updateConnectionBadge() {
+      const badge = document.getElementById("connection-status-badge");
+      if (!badge) return;
+      if (firestoreConnected) {
+        badge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30";
+        badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse-soft"></span>Firestore connecté • Temps réel actif`;
+      } else {
+        badge.className = "inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-400/30";
+        badge.innerHTML = `<span class="h-2 w-2 rounded-full bg-amber-400"></span>Mode Local`;
+      }
     }
 
-    // =========================================================================
-    // 4. CHRONOMÈTRE DE REPOS AUTOMATIQUE + BIP AUDIO
-    // =========================================================================
-    let restTimer = null;
-    let restRemaining = 0;
-    let restTotal = 90;
-
-    function playBeep() {
+    // -------------------------------------------------------------------------
+    // 3. AUDIO & FLOATING REST TIMER ENGINE
+    // -------------------------------------------------------------------------
+    function playTimerBeep() {
       try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = "sine";
         osc.frequency.setValueAtTime(880, ctx.currentTime);
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.setValueAtTime(0.14, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + 0.35);
-      } catch (_) {}
+        osc.stop(ctx.currentTime + 0.45);
+      } catch (_) {
+        // Ignore audio autoplay blocks on restricted browsers
+      }
     }
 
-    window.startRestTimer = function(seconds, exerciseName) {
-      clearInterval(restTimer);
-      restTotal = Math.max(10, Number(seconds) || 60);
-      restRemaining = restTotal;
+    function formatSeconds(sec) {
+      const safe = Math.max(0, Math.floor(sec));
+      const m = Math.floor(safe / 60).toString().padStart(2, "0");
+      const s = (safe % 60).toString().padStart(2, "0");
+      return `${m}:${s}`;
+    }
 
-      const bar = document.getElementById("restTimerBar");
-      document.getElementById("restExerciseName").textContent = exerciseName || "Récupération";
-      bar.classList.remove("hidden");
-      updateRestUI();
+    window.startRestTimer = function(seconds, labelText = "Série validée • Récupération") {
+      const duration = Number(seconds) > 0 ? Number(seconds) : 90;
+      timerTotal = duration;
+      timerRemaining = duration;
 
-      restTimer = setInterval(() => {
-        restRemaining--;
-        if (restRemaining <= 0) {
-          clearInterval(restTimer);
-          restRemaining = 0;
-          updateRestUI();
-          playBeep();
+      const widget = document.getElementById("rest-timer-widget");
+      const contextEl = document.getElementById("timer-context");
+      if (contextEl) contextEl.textContent = labelText;
+      if (widget) widget.classList.remove("hidden");
+
+      updateTimerUI();
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        timerRemaining -= 1;
+        updateTimerUI();
+        if (timerRemaining <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          playTimerBeep();
+          showToast("Temps de repos terminé — Prochaine série !", "success");
           setTimeout(() => {
-            bar.classList.add("hidden");
+            if (timerRemaining <= 0) {
+              document.getElementById("rest-timer-widget")?.classList.add("hidden");
+            }
           }, 1800);
-        } else {
-          updateRestUI();
         }
       }, 1000);
     };
 
-    window.adjustRest = function(delta) {
-      restRemaining = Math.max(5, restRemaining + delta);
-      if (restRemaining > restTotal) restTotal = restRemaining;
-      updateRestUI();
+    function updateTimerUI() {
+      const countEl = document.getElementById("timer-countdown");
+      const barEl = document.getElementById("timer-progress-bar");
+      if (countEl) countEl.textContent = formatSeconds(timerRemaining);
+      if (barEl && timerTotal > 0) {
+        const pct = Math.max(0, Math.min(100, (timerRemaining / timerTotal) * 100));
+        barEl.style.width = `${pct}%`;
+      }
+    }
+
+    window.adjustRestTimer = function(deltaSec) {
+      timerRemaining = Math.max(5, timerRemaining + deltaSec);
+      if (timerRemaining > timerTotal) timerTotal = timerRemaining;
+      updateTimerUI();
     };
 
     window.stopRestTimer = function() {
-      clearInterval(restTimer);
-      document.getElementById("restTimerBar").classList.add("hidden");
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      timerRemaining = 0;
+      document.getElementById("rest-timer-widget")?.classList.add("hidden");
     };
 
-    function updateRestUI() {
-      const m = String(Math.floor(restRemaining / 60)).padStart(2, "0");
-      const s = String(restRemaining % 60).padStart(2, "0");
-      document.getElementById("restClock").textContent = `${m}:${s}`;
-      const pct = restTotal > 0 ? Math.min(100, Math.round((restRemaining / restTotal) * 100)) : 0;
-      document.getElementById("restProgress").style.width = `${pct}%`;
-    }
-
-    // =========================================================================
-    // 5. MODALE DÉMO VIDÉO / MACHINE
-    // =========================================================================
-    function extractYoutubeId(url) {
-      if (!url) return null;
-      const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      return m ? m[1] : null;
-    }
-
-    window.openDemoModal = function(exerciseId) {
-      const ex = state.exercises.find(e => e.id === exerciseId);
-      if (!ex) return;
-      document.getElementById("demoTitle").textContent = ex.name;
-      document.getElementById("demoMachine").textContent = `Machine / Matériel : ${ex.machine || "Standard"}`;
-
-      const container = document.getElementById("demoVideoContainer");
-      const ytId = extractYoutubeId(ex.videoUrl);
-
-      if (ytId) {
-        container.innerHTML = `
-          <div class="relative aspect-video w-full bg-black">
-            <iframe
-              class="h-full w-full"
-              src="https://www.youtube-nocookie.com/embed/${ytId}?rel=0&playsinline=1"
-              title="${ex.name}"
-              frameborder="0"
-              referrerpolicy="strict-origin-when-cross-origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen>
-            </iframe>
-          </div>
-          <div class="flex items-center justify-between bg-slate-900 px-3 py-2 text-xs text-slate-400">
-            <span>Problème d'affichage vidéo ?</span>
-            <a href="${ex.videoUrl}" target="_blank" rel="noopener noreferrer" class="font-semibold text-emerald-400 hover:underline">Ouvrir sur YouTube ↗</a>
-          </div>
-        `;
-      } else if (ex.videoUrl) {
-        container.innerHTML = `
-          <div class="p-4 text-center">
-            <a href="${ex.videoUrl}" target="_blank" rel="noopener noreferrer" class="inline-block rounded-xl bg-emerald-500/20 border border-emerald-500/40 px-4 py-2 text-sm font-semibold text-emerald-300">
-              Ouvrir la vidéo de démonstration ↗
-            </a>
-          </div>
-        `;
-      } else {
-        container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">Aucune vidéo renseignée par le coach pour cet exercice.</div>`;
-      }
-
-      const tipsEl = document.getElementById("demoTips");
-      const tips = Array.isArray(ex.tips) && ex.tips.length ? ex.tips : ["Garde le mouvement contrôlé et la posture stable."];
-      tipsEl.innerHTML = tips.map(t => `<li>${t}</li>`).join("");
-
-      const modal = document.getElementById("demoModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    };
-
-    window.closeDemoModal = function() {
-      const modal = document.getElementById("demoModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-      document.getElementById("demoVideoContainer").innerHTML = "";
-    };
-
-    // =========================================================================
-    // 6. ACTIONS UTILISATEUR (AUTH, COACH, CLIENT)
-    // =========================================================================
-    window.setLoginTab = function(tab) {
-      loginTab = tab;
-      render();
-    };
-
-    window.fillQuickLogin = function(type) {
-      if (type === "coach") {
-        loginTab = "coach";
-        render();
-        document.getElementById("coachEmailInput").value = state.coachAuth.email;
-        document.getElementById("coachPassInput").value = state.coachAuth.password;
-      } else {
-        loginTab = "client";
-        render();
-        document.getElementById("clientCodeInput").value = type;
-      }
-    };
-
-    window.handleClientLogin = function(e) {
-      e.preventDefault();
-      const code = document.getElementById("clientCodeInput").value.trim().toUpperCase();
-      const client = state.clients.find(c => c.code.toUpperCase() === code);
-      if (!client) {
-        alert("Code d'accès invalide. Vérifie auprès de ton coach.");
-        return;
-      }
-      if (!client.active) {
-        alert("Ton accès est actuellement suspendu. Contacte ton coach.");
-        return;
-      }
-      session = { role: "client", clientId: client.id, previewByCoach: false };
-      saveSession();
-      render();
-    };
-
-    window.handleCoachLogin = function(e) {
-      e.preventDefault();
-      const email = document.getElementById("coachEmailInput").value.trim().toLowerCase();
-      const pass = document.getElementById("coachPassInput").value;
-      if (email === state.coachAuth.email.toLowerCase() && pass === state.coachAuth.password) {
-        session = { role: "coach" };
-        saveSession();
-        render();
-      } else {
-        alert("Identifiants Coach incorrects.");
-      }
-    };
-
-    window.logout = function() {
-      stopRestTimer();
-      session = null;
-      saveSession();
-      render();
-    };
-
-    window.previewClientAsCoach = function(clientId) {
-      session = { role: "client", clientId, previewByCoach: true };
-      saveSession();
-      render();
-    };
-
-    window.returnToCoach = function() {
-      session = { role: "coach" };
-      saveSession();
-      render();
-    };
-
-    window.setCoachTab = function(tab) {
-      coachTab = tab;
-      render();
-    };
-
-    window.selectClient = function(id) {
-      selectedClientId = id;
-      render();
-    };
-
-    window.createClient = function(e) {
-      e.preventDefault();
-      const name = document.getElementById("newClientName").value.trim();
-      const goal = document.getElementById("newClientGoal").value.trim() || "Remise en forme";
-      const weight = parseFloat(document.getElementById("newClientWeight").value) || 75;
-      const targetWeight = parseFloat(document.getElementById("newClientTarget").value) || 70;
-      if (!name) return;
-
-      const prefix = name.split(" ")[0].toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6) || "ATHLETE";
-      const code = `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
-      const newClient = {
-        id: "c_" + Date.now(),
-        name,
-        code,
-        active: true,
-        goal,
-        weight,
-        targetWeight,
-        weightHistory: [{ date: "Départ", val: weight }],
-        nutrition: { calories: 2200, protein: 150, carbs: 230, fats: 65, meals: "Plan alimentaire à personnaliser." },
-        workoutName: "Séance 1 — Programme personnalisé",
-        workoutItems: []
+    // -------------------------------------------------------------------------
+    // 4. TOAST & MODAL HELPERS
+    // -------------------------------------------------------------------------
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+      const styles = {
+        success: "bg-emerald-950/95 border-emerald-400/40 text-emerald-200",
+        error: "bg-rose-950/95 border-rose-400/40 text-rose-200",
+        info: "bg-slate-900/95 border-sky-400/40 text-sky-100"
       };
-      state.clients.push(newClient);
-      selectedClientId = newClient.id;
-      saveState();
+      const el = document.createElement("div");
+      el.className = `pointer-events-auto border rounded-xl px-4 py-3 text-xs sm:text-sm font-medium shadow-xl transition ${styles[type] || styles.info}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(-6px)";
+        setTimeout(() => el.remove(), 250);
+      }, 3200);
+    }
+
+    function openModal(htmlContent) {
+      const backdrop = document.getElementById("modal-backdrop");
+      const card = document.getElementById("modal-card");
+      if (!backdrop || !card) return;
+      card.innerHTML = htmlContent;
+      backdrop.classList.remove("hidden");
+      backdrop.classList.add("flex");
+    }
+
+    window.closeModal = function() {
+      const backdrop = document.getElementById("modal-backdrop");
+      if (!backdrop) return;
+      backdrop.classList.add("hidden");
+      backdrop.classList.remove("flex");
+    };
+
+    document.getElementById("modal-backdrop")?.addEventListener("click", (e) => {
+      if (e.target.id === "modal-backdrop") closeModal();
+    });
+
+    // -------------------------------------------------------------------------
+    // 5. ATHLETE & COACH ACTIONS
+    // -------------------------------------------------------------------------
+    function getAthleteById(id) {
+      return appState.athletes.find((a) => a.id === id) || appState.athletes[0];
+    }
+
+    window.loginAthleteByCode = function(event) {
+      event.preventDefault();
+      const input = document.getElementById("athlete-code-input");
+      const rawCode = (input?.value || "").trim().toUpperCase();
+      const found = appState.athletes.find((a) => a.code.toUpperCase() === rawCode);
+      if (!found) {
+        showToast("Code athlète introuvable. Essaye LUCAS-2026 ou CHLOE-2026.", "error");
+        return;
+      }
+      session.role = "athlete";
+      session.athleteId = found.id;
+      session.athleteActiveTab = "workout";
+      showToast(`Bienvenue ${found.name} !`, "success");
       render();
     };
 
-    window.toggleClientActive = function(clientId) {
-      const c = state.clients.find(x => x.id === clientId);
-      if (!c) return;
-      c.active = !c.active;
-      saveState();
+    window.quickFillAthleteCode = function(code) {
+      const input = document.getElementById("athlete-code-input");
+      if (input) input.value = code;
+    };
+
+    window.loginCoach = function(event) {
+      event.preventDefault();
+      const email = (document.getElementById("coach-email-input")?.value || "").trim().toLowerCase();
+      const password = (document.getElementById("coach-password-input")?.value || "").trim();
+      if (email === "coach@btraining.fr" && password === "admin") {
+        session.role = "coach";
+        session.coachActiveTab = "athletes";
+        if (!session.selectedCoachAthleteId && appState.athletes[0]) {
+          session.selectedCoachAthleteId = appState.athletes[0].id;
+        }
+        showToast("Connexion Coach validée.", "success");
+        render();
+      } else {
+        showToast("Identifiants Coach invalides (coach@btraining.fr / admin).", "error");
+      }
+    };
+
+    window.logoutSession = function() {
+      stopRestTimer();
+      session.role = null;
+      session.athleteId = null;
       render();
     };
 
-    window.regenerateClientCode = function(clientId) {
-      const c = state.clients.find(x => x.id === clientId);
-      if (!c) return;
-      const prefix = c.name.split(" ")[0].toUpperCase().replace(/[^A-Z]/g, "").slice(0, 6) || "ATHLETE";
-      c.code = `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
-      saveState();
-      render();
+    window.toggleAthleteSet = function(athleteId, workoutId, exerciseId, setIndex) {
+      const next = structuredClone(appState);
+      const ath = next.athletes.find((a) => a.id === athleteId);
+      if (!ath) return;
+      const wk = ath.workouts.find((w) => w.id === workoutId);
+      if (!wk) return;
+      const ex = wk.exercises.find((e) => e.id === exerciseId);
+      if (!ex) return;
+
+      if (!Array.isArray(ex.completedSets)) {
+        ex.completedSets = Array.from({ length: ex.setsCount }, () => false);
+      }
+
+      const willComplete = !ex.completedSets[setIndex];
+      ex.completedSets[setIndex] = willComplete;
+      persistState(next);
+
+      if (willComplete) {
+        const restDuration = ex.restSec || wk.restDefault || 90;
+        startRestTimer(restDuration, `${ex.name} • Série ${setIndex + 1}/${ex.setsCount} validée`);
+      }
     };
 
-    window.copyInvite = function(clientId) {
-      const c = state.clients.find(x => x.id === clientId);
-      if (!c) return;
-      const url = window.location.href.split("#")[0];
-      const msg = `Salut ${c.name} ! Voici ton accès personnel B training :\nLien : ${url}\nTon code personnel : ${c.code}`;
-      navigator.clipboard?.writeText(msg);
-      alert("Invitation copiée dans le presse-papier :\n\n" + msg);
+    window.updateLoggedLoad = function(athleteId, workoutId, exerciseId, setIndex, value) {
+      const next = structuredClone(appState);
+      const ath = next.athletes.find((a) => a.id === athleteId);
+      const wk = ath?.workouts.find((w) => w.id === workoutId);
+      const ex = wk?.exercises.find((e) => e.id === exerciseId);
+      if (!ex) return;
+      if (!Array.isArray(ex.loggedLoads)) ex.loggedLoads = [];
+      ex.loggedLoads[setIndex] = value;
+      saveLocalState(next);
+      appState = next;
     };
 
-    window.addExerciseToClient = function(e) {
-      e.preventDefault();
-      const c = state.clients.find(x => x.id === selectedClientId);
-      if (!c) return;
-      const exerciseId = document.getElementById("progExSelect").value;
-      const sets = parseInt(document.getElementById("progSets").value) || 4;
-      const reps = document.getElementById("progReps").value.trim() || "10";
-      const rest = parseInt(document.getElementById("progRest").value) || 90;
-      const load = document.getElementById("progLoad").value.trim() || "À définir";
-
-      c.workoutItems.push({
-        uid: "w_" + Date.now(),
-        exerciseId,
-        sets,
-        reps,
-        rest,
-        load,
-        completedSets: Array(sets).fill(false)
-      });
-      saveState();
-      render();
+    window.commitLoggedLoads = function() {
+      persistState(appState);
+      showToast("Charges enregistrées et synchronisées.", "success");
     };
 
-    window.removeWorkoutItem = function(uid) {
-      const c = state.clients.find(x => x.id === selectedClientId);
-      if (!c) return;
-      c.workoutItems = c.workoutItems.filter(w => w.uid !== uid);
-      saveState();
-      render();
+    window.openExerciseGuideModal = function(athleteId, workoutId, exerciseId) {
+      const ath = getAthleteById(athleteId);
+      const wk = ath?.workouts.find((w) => w.id === workoutId);
+      const ex = wk?.exercises.find((e) => e.id === exerciseId);
+      if (!ex) return;
+
+      const safeUrl = ex.videoUrl && /^https?:\/\//i.test(ex.videoUrl) ? ex.videoUrl : "";
+      openModal(`
+        <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-sky-400">Fiche Mouvement & Réglage Machine</span>
+            <h3 class="text-xl font-bold text-white mt-1">${escapeHtml(ex.name)}</h3>
+            <p class="text-xs text-slate-400 mt-0.5">${escapeHtml(ex.machine || "Équipement libre")}</p>
+          </div>
+          <button type="button" onclick="closeModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold">✕</button>
+        </div>
+
+        <div class="mt-4 space-y-4 text-sm">
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+            <h4 class="font-bold text-emerald-300 text-xs uppercase tracking-wider mb-1.5">Exécution technique</h4>
+            <p class="text-slate-200 leading-relaxed">${escapeHtml(ex.executionTip || "Maintenez un contrôle moteur complet sur chaque phase.")}</p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+            <h4 class="font-bold text-sky-300 text-xs uppercase tracking-wider mb-1.5">Réglage machine & sécurité</h4>
+            <p class="text-slate-200 leading-relaxed">${escapeHtml(ex.machineTip || "Ajustez la hauteur et les butées avant de charger.")}</p>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div class="text-xs text-slate-400">
+              Cible : <strong class="text-slate-200">${ex.setsCount} × ${escapeHtml(ex.repsTarget)}</strong> • Charge repère : <strong class="text-sky-300">${escapeHtml(ex.loadHint || "—")}</strong>
+            </div>
+            ${safeUrl ? `
+              <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">
+                ▶ Voir vidéo de référence
+              </a>
+            ` : ""}
+          </div>
+        </div>
+      `);
     };
 
-    window.saveClientProgramAndNutrition = function() {
-      const c = state.clients.find(x => x.id === selectedClientId);
-      if (!c) return;
-      c.workoutName = document.getElementById("editWorkoutName").value.trim() || c.workoutName;
-      c.nutrition.calories = parseInt(document.getElementById("editCal").value) || c.nutrition.calories;
-      c.nutrition.protein = parseInt(document.getElementById("editProt").value) || c.nutrition.protein;
-      c.nutrition.carbs = parseInt(document.getElementById("editCarbs").value) || c.nutrition.carbs;
-      c.nutrition.fats = parseInt(document.getElementById("editFats").value) || c.nutrition.fats;
-      c.nutrition.meals = document.getElementById("editMeals").value;
-      saveState();
-      alert("Programme et nutrition enregistrés et synchronisés !");
-      render();
+    window.addAthleteCheckin = function(event, athleteId) {
+      event.preventDefault();
+      const weightKg = parseFloat(document.getElementById("checkin-weight")?.value);
+      const bodyFatPct = parseFloat(document.getElementById("checkin-bf")?.value);
+      const sleepHours = parseFloat(document.getElementById("checkin-sleep")?.value);
+      const notes = (document.getElementById("checkin-notes")?.value || "").trim();
+
+      const calories = parseInt(document.getElementById("nut-calories")?.value, 10);
+      const proteinG = parseInt(document.getElementById("nut-protein")?.value, 10);
+      const carbsG = parseInt(document.getElementById("nut-carbs")?.value, 10);
+      const fatsG = parseInt(document.getElementById("nut-fats")?.value, 10);
+      const waterL = parseFloat(document.getElementById("nut-water")?.value);
+
+      const next = structuredClone(appState);
+      const ath = next.athletes.find((a) => a.id === athleteId);
+      if (!ath) return;
+
+      const today = new Date().toISOString().slice(0, 10);
+      if (!Number.isNaN(weightKg)) {
+        ath.biometrics.push({
+          id: "bio_" + Date.now(),
+          date: today,
+          weightKg,
+          bodyFatPct: Number.isNaN(bodyFatPct) ? null : bodyFatPct,
+          sleepHours: Number.isNaN(sleepHours) ? 7.5 : sleepHours,
+          rhrBpm: 55,
+          notes: notes || "Check-in enregistré"
+        });
+      }
+
+      if (!Number.isNaN(calories) || !Number.isNaN(proteinG)) {
+        ath.nutritionLogs.push({
+          id: "nut_" + Date.now(),
+          date: today,
+          calories: Number.isNaN(calories) ? 2800 : calories,
+          proteinG: Number.isNaN(proteinG) ? 160 : proteinG,
+          carbsG: Number.isNaN(carbsG) ? 300 : carbsG,
+          fatsG: Number.isNaN(fatsG) ? 75 : fatsG,
+          waterL: Number.isNaN(waterL) ? 2.5 : waterL,
+          adherencePct: 95
+        });
+      }
+
+      persistState(next);
+      showToast("Check-in biométrique & nutritionnel enregistré !", "success");
     };
 
-    window.addLibraryExercise = function(e) {
-      e.preventDefault();
-      const name = document.getElementById("libName").value.trim();
-      const muscle = document.getElementById("libMuscle").value.trim() || "Général";
-      const machine = document.getElementById("libMachine").value.trim() || "Machine / Haltères";
-      const videoUrl = document.getElementById("libVideo").value.trim();
-      const tipsRaw = document.getElementById("libTips").value.trim();
-      if (!name) return;
+    // Coach Management Actions
+    window.createAthleteProfile = function(event) {
+      event.preventDefault();
+      const name = (document.getElementById("new-ath-name")?.value || "").trim();
+      const code = (document.getElementById("new-ath-code")?.value || "").trim().toUpperCase();
+      const sport = (document.getElementById("new-ath-sport")?.value || "Préparation Physique").trim();
+      const objective = (document.getElementById("new-ath-obj")?.value || "Progression globale").trim();
 
-      state.exercises.push({
+      if (!name || !code) {
+        showToast("Nom et code d'accès athlète requis.", "error");
+        return;
+      }
+      if (appState.athletes.some((a) => a.code.toUpperCase() === code)) {
+        showToast("Ce code athlète existe déjà.", "error");
+        return;
+      }
+
+      const newAthlete = {
+        id: "ath_" + Date.now(),
+        code,
+        name,
+        sport,
+        objective,
+        status: "Actif",
+        workouts: [
+          {
+            id: "wk_" + Date.now(),
+            title: "Séance Initiale — Fondamentaux",
+            focus: sport,
+            restDefault: 90,
+            exercises: []
+          }
+        ],
+        biometrics: [
+          { id: "bio_" + Date.now(), date: new Date().toISOString().slice(0, 10), weightKg: 70.0, bodyFatPct: 15.0, sleepHours: 7.5, rhrBpm: 58, notes: "Évaluation initiale" }
+        ],
+        nutritionLogs: [
+          { id: "nut_" + Date.now(), date: new Date().toISOString().slice(0, 10), calories: 2700, proteinG: 155, carbsG: 300, fatsG: 75, waterL: 2.5, adherencePct: 90 }
+        ],
+        nutritionTarget: { calories: 2750, proteinG: 160, carbsG: 310, fatsG: 75, waterL: 2.8 }
+      };
+
+      const next = structuredClone(appState);
+      next.athletes.push(newAthlete);
+      session.selectedCoachAthleteId = newAthlete.id;
+      persistState(next);
+      showToast(`Athlète ${name} (${code}) ajouté !`, "success");
+    };
+
+    window.assignExerciseToAthlete = function(event) {
+      event.preventDefault();
+      const athleteId = document.getElementById("assign-athlete-select")?.value;
+      const workoutTitle = (document.getElementById("assign-workout-title")?.value || "Séance Personnalisée").trim();
+      const name = (document.getElementById("assign-ex-name")?.value || "").trim();
+      const machine = (document.getElementById("assign-ex-machine")?.value || "Équipement standard").trim();
+      const setsCount = Math.max(1, Math.min(8, parseInt(document.getElementById("assign-ex-sets")?.value, 10) || 3));
+      const repsTarget = (document.getElementById("assign-ex-reps")?.value || "8-12 reps").trim();
+      const loadHint = (document.getElementById("assign-ex-load")?.value || "À calibrer").trim();
+      const restSec = Math.max(15, parseInt(document.getElementById("assign-ex-rest")?.value, 10) || 90);
+      const videoUrl = (document.getElementById("assign-ex-video")?.value || "").trim();
+      const executionTip = (document.getElementById("assign-ex-exec")?.value || "Contrôle de la charge sur toute l'amplitude.").trim();
+      const machineTip = (document.getElementById("assign-ex-machinetip")?.value || "Vérifier l'alignement articulaire avant de démarrer.").trim();
+
+      if (!name) {
+        showToast("Indique le nom de l'exercice.", "error");
+        return;
+      }
+
+      const next = structuredClone(appState);
+      const ath = next.athletes.find((a) => a.id === athleteId);
+      if (!ath) return;
+
+      let wk = ath.workouts.find((w) => w.title.toLowerCase() === workoutTitle.toLowerCase());
+      if (!wk) {
+        wk = {
+          id: "wk_" + Date.now(),
+          title: workoutTitle,
+          focus: ath.sport,
+          restDefault: restSec,
+          exercises: []
+        };
+        ath.workouts.push(wk);
+      }
+
+      wk.exercises.push({
         id: "ex_" + Date.now(),
         name,
-        muscle,
         machine,
+        setsCount,
+        repsTarget,
+        loadHint,
+        restSec,
         videoUrl,
-        tips: tipsRaw ? tipsRaw.split("\n").filter(Boolean) : ["Contrôle la phase excentrique et garde le buste gainé."]
+        executionTip,
+        machineTip,
+        completedSets: Array.from({ length: setsCount }, () => false),
+        loggedLoads: Array.from({ length: setsCount }, () => `${loadHint} x ?`)
       });
-      saveState();
-      render();
+
+      persistState(next);
+      showToast(`Exercice "${name}" assigné à ${ath.name} !`, "success");
     };
 
-    window.updateCoachCredentials = function(e) {
-      e.preventDefault();
-      const email = document.getElementById("secEmail").value.trim();
-      const pass = document.getElementById("secPass").value.trim();
-      if (!email || !pass) return;
-      state.coachAuth.email = email;
-      state.coachAuth.password = pass;
-      saveState();
-      alert("Identifiants Coach mis à jour !");
-    };
+    // -------------------------------------------------------------------------
+    // 6. RENDERERS (LOGIN, COACH DASHBOARD, ATHLETE DASHBOARD)
+    // -------------------------------------------------------------------------
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
 
-    // Actions côté Athlète
-    window.setClientTab = function(tab) {
-      clientTab = tab;
-      render();
-    };
-
-    window.toggleSetDone = function(uid, setIndex) {
-      const c = state.clients.find(x => x.id === session.clientId);
-      if (!c) return;
-      const item = c.workoutItems.find(w => w.uid === uid);
-      if (!item) return;
-
-      const wasDone = item.completedSets[setIndex];
-      item.completedSets[setIndex] = !wasDone;
-
-      // Déclenche automatiquement le chrono de repos quand on valide une série
-      if (!wasDone) {
-        const ex = state.exercises.find(e => e.id === item.exerciseId);
-        startRestTimer(item.rest, `${ex?.name || "Exercice"} — Série ${setIndex + 1}/${item.sets}`);
-      }
-
-      saveState();
-      render();
-    };
-
-    window.resetClientWorkout = function() {
-      const c = state.clients.find(x => x.id === session.clientId);
-      if (!c) return;
-      c.workoutItems.forEach(item => {
-        item.completedSets = Array(item.sets).fill(false);
-      });
-      stopRestTimer();
-      saveState();
-      render();
-    };
-
-    window.logClientWeight = function(e) {
-      e.preventDefault();
-      const c = state.clients.find(x => x.id === session.clientId);
-      if (!c) return;
-      const val = parseFloat(document.getElementById("clientWeightInput").value);
-      if (!val || val < 30 || val > 250) return;
-      c.weight = val;
-      const label = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
-      c.weightHistory.push({ date: label, val });
-      saveState();
-      render();
-    };
-
-    // =========================================================================
-    // 7. RENDU DES INTERFACES
-    // =========================================================================
-    function renderLogin() {
+    function renderTopBar() {
+      const activeAthlete = session.role === "athlete" ? getAthleteById(session.athleteId) : null;
       return `
-        <div class="min-h-screen flex flex-col items-center justify-center px-4 py-10">
-          <div class="w-full max-w-md rounded-3xl border border-slate-800 bg-[#0f172a] p-6 sm:p-8 shadow-2xl">
-            <div class="flex items-center justify-center gap-3 mb-2">
-              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500 font-black text-xl text-slate-950 shadow-lg shadow-emerald-500/20">B</div>
+        <header class="border-b border-slate-800/90 bg-slate-950/80 backdrop-blur sticky top-0 z-20">
+          <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-400 to-emerald-400 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-sky-500/20">
+                B
+              </div>
               <div>
-                <h1 class="text-2xl font-black tracking-tight text-white">B training</h1>
-                <p class="text-xs text-slate-400">Performance & Coaching Athlétique</p>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                  <span class="font-extrabold tracking-tight text-white text-lg">B training</span>
+                  <span id="connection-status-badge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
+                    firestoreConnected
+                      ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/30"
+                      : "bg-amber-500/15 text-amber-300 border border-amber-400/30"
+                  }">
+                    <span class="h-2 w-2 rounded-full ${firestoreConnected ? "bg-emerald-400 animate-pulse-soft" : "bg-amber-400"}"></span>
+                    ${firestoreConnected ? "Firestore connecté • Temps réel actif" : "Mode Local"}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-400 hidden sm:block">Plateforme Coaching • Séances, Biométrie & Nutrition</p>
               </div>
             </div>
 
-            <div class="mt-4 text-center">
-              <span id="syncBadge" class="inline-block rounded-full border border-slate-800 bg-slate-900 px-3 py-1 text-[11px] text-slate-400">${syncStatus}</span>
+            ${session.role ? `
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-slate-300 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
+                  ${session.role === "coach" ? "Coach • B training" : `Athlète • ${escapeHtml(activeAthlete?.name || "")}`}
+                </span>
+                <button type="button" onclick="logoutSession()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-200 hover:border-rose-400/40 border border-slate-700 text-xs font-semibold text-slate-200 transition">
+                  Déconnexion
+                </button>
+              </div>
+            ` : ""}
+          </div>
+        </header>
+      `;
+    }
+
+    function renderLoginScreen() {
+      return `
+        <main class="flex-1 flex items-center justify-center px-4 py-10">
+          <div class="max-w-xl w-full glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-800">
+            <div class="text-center mb-7">
+              <div class="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-br from-sky-400 to-emerald-400 text-slate-950 font-black text-2xl mb-3 shadow-lg shadow-sky-500/25">
+                B
+              </div>
+              <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">B training</h1>
+              <p class="text-sm text-slate-400 mt-1.5">Suivi athlétique, programmation & chronomètre de repos en direct</p>
             </div>
 
-            <div class="mt-6 grid grid-cols-2 rounded-xl bg-slate-900 p-1 border border-slate-800">
-              <button onclick="setLoginTab('client')" class="rounded-lg py-2.5 text-xs font-bold transition ${loginTab === 'client' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'}">
+            <!-- Dual Login Tabs -->
+            <div class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 mb-6">
+              <button type="button" id="tab-btn-athlete" onclick="switchLoginTab('athlete')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-sky-500 text-slate-950 shadow transition">
                 Accès Athlète
               </button>
-              <button onclick="setLoginTab('coach')" class="rounded-lg py-2.5 text-xs font-bold transition ${loginTab === 'coach' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'}">
+              <button type="button" id="tab-btn-coach" onclick="switchLoginTab('coach')" class="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition">
                 Espace Coach
               </button>
             </div>
 
-            ${loginTab === "client" ? `
-              <form onsubmit="handleClientLogin(event)" class="mt-6 space-y-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Code personnel athlète</label>
-                  <input id="clientCodeInput" type="text" placeholder="Ex: LUCAS-2026" required
-                    class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm font-mono uppercase text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none" />
+            <!-- Athlete Login Panel -->
+            <form id="login-panel-athlete" onsubmit="loginAthleteByCode(event)" class="space-y-4">
+              <div>
+                <label for="athlete-code-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  Code d'accès Athlète
+                </label>
+                <input
+                  id="athlete-code-input"
+                  type="text"
+                  value="LUCAS-2026"
+                  placeholder="Ex : LUCAS-2026"
+                  required
+                  class="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/80 focus:border-sky-400 focus:outline-none text-white font-semibold tracking-wider uppercase"
+                />
+              </div>
+              <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                <span>Comptes démo :</span>
+                <button type="button" onclick="quickFillAthleteCode('LUCAS-2026')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 font-semibold">LUCAS-2026</button>
+                <button type="button" onclick="quickFillAthleteCode('CHLOE-2026')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 font-semibold">CHLOE-2026</button>
+              </div>
+              <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-emerald-400 hover:opacity-95 text-slate-950 font-extrabold text-sm shadow-lg shadow-sky-500/20 transition">
+                Accéder à mon espace Athlète
+              </button>
+            </form>
+
+            <!-- Coach Login Panel -->
+            <form id="login-panel-coach" onsubmit="loginCoach(event)" class="space-y-4 hidden">
+              <div>
+                <label for="coach-email-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  Email Coach
+                </label>
+                <input
+                  id="coach-email-input"
+                  type="email"
+                  value="coach@btraining.fr"
+                  required
+                  class="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/80 focus:border-sky-400 focus:outline-none text-white"
+                />
+              </div>
+              <div>
+                <label for="coach-password-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  Mot de passe
+                </label>
+                <input
+                  id="coach-password-input"
+                  type="password"
+                  value="admin"
+                  required
+                  class="w-full px-4 py-3 rounded-xl bg-slate-950/90 border border-slate-700/80 focus:border-sky-400 focus:outline-none text-white"
+                />
+              </div>
+              <p class="text-xs text-slate-400">Identifiants par défaut : <span class="text-slate-200 font-semibold">coach@btraining.fr</span> / <span class="text-slate-200 font-semibold">admin</span></p>
+              <button type="submit" class="w-full py-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-sm transition">
+                Ouvrir le tableau de bord Coach
+              </button>
+            </form>
+          </div>
+        </main>
+      `;
+    }
+
+    window.switchLoginTab = function(tab) {
+      const btnAth = document.getElementById("tab-btn-athlete");
+      const btnCoach = document.getElementById("tab-btn-coach");
+      const panelAth = document.getElementById("login-panel-athlete");
+      const panelCoach = document.getElementById("login-panel-coach");
+      if (!btnAth || !btnCoach || !panelAth || !panelCoach) return;
+
+      if (tab === "athlete") {
+        btnAth.className = "py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-sky-500 text-slate-950 shadow transition";
+        btnCoach.className = "py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition";
+        panelAth.classList.remove("hidden");
+        panelCoach.classList.add("hidden");
+      } else {
+        btnCoach.className = "py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-sky-500 text-slate-950 shadow transition";
+        btnAth.className = "py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition";
+        panelCoach.classList.remove("hidden");
+        panelAth.classList.add("hidden");
+      }
+    };
+
+    function renderCoachDashboard() {
+      const selectedAth = getAthleteById(session.selectedCoachAthleteId);
+      const totalExercises = appState.athletes.reduce(
+        (acc, a) => acc + a.workouts.reduce((wAcc, w) => wAcc + w.exercises.length, 0),
+        0
+      );
+
+      return `
+        <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
+          <!-- KPI Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="glass-panel rounded-2xl p-4">
+              <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Athlètes suivis</p>
+              <p class="text-2xl font-extrabold text-white mt-1">${appState.athletes.length}</p>
+            </div>
+            <div class="glass-panel rounded-2xl p-4">
+              <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Exercices programmés</p>
+              <p class="text-2xl font-extrabold text-sky-400 mt-1">${totalExercises}</p>
+            </div>
+            <div class="glass-panel rounded-2xl p-4">
+              <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Athlète sélectionné</p>
+              <p class="text-lg font-bold text-emerald-300 mt-1 truncate">${escapeHtml(selectedAth?.name || "—")}</p>
+            </div>
+          </div>
+
+          <!-- Coach Navigation Tabs -->
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="setCoachTab('athletes')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.coachActiveTab === 'athletes' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
+              Athlètes & Création
+            </button>
+            <button type="button" onclick="setCoachTab('workouts')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.coachActiveTab === 'workouts' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
+              Assigner Séance & Vidéo
+            </button>
+            <button type="button" onclick="setCoachTab('tracking')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.coachActiveTab === 'tracking' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
+              Biométrie & Nutrition
+            </button>
+          </div>
+
+          ${session.coachActiveTab === "athletes" ? renderCoachAthletesTab() : ""}
+          ${session.coachActiveTab === "workouts" ? renderCoachWorkoutsTab(selectedAth) : ""}
+          ${session.coachActiveTab === "tracking" ? renderCoachTrackingTab(selectedAth) : ""}
+        </main>
+      `;
+    }
+
+    window.setCoachTab = function(tab) {
+      session.coachActiveTab = tab;
+      render();
+    };
+
+    window.selectCoachAthlete = function(athleteId) {
+      session.selectedCoachAthleteId = athleteId;
+      render();
+    };
+
+    function renderCoachAthletesTab() {
+      return `
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-7 space-y-3">
+            <h2 class="text-base font-bold text-white">Liste des Athlètes</h2>
+            ${appState.athletes.map((ath) => {
+              const isSelected = ath.id === session.selectedCoachAthleteId;
+              const latestBio = ath.biometrics[ath.biometrics.length - 1];
+              return `
+                <div onclick="selectCoachAthlete('${ath.id}')" class="cursor-pointer glass-panel rounded-2xl p-4 border transition ${isSelected ? 'border-sky-400 bg-sky-950/20' : 'border-slate-800 hover:border-slate-700'}">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="font-bold text-white text-base">${escapeHtml(ath.name)}</h3>
+                        <span class="px-2.5 py-0.5 rounded-lg bg-sky-500/15 text-sky-300 text-xs font-mono font-bold">${escapeHtml(ath.code)}</span>
+                      </div>
+                      <p class="text-xs text-slate-400 mt-1">${escapeHtml(ath.sport)} • ${escapeHtml(ath.objective)}</p>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300">${escapeHtml(ath.status)}</span>
+                  </div>
+                  <div class="mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap gap-4 text-xs text-slate-300">
+                    <span>Séances : <strong>${ath.workouts.length}</strong></span>
+                    <span>Poids actuel : <strong>${latestBio ? latestBio.weightKg + " kg" : "—"}</strong></span>
+                    <span>Logs nutrition : <strong>${ath.nutritionLogs.length}</strong></span>
+                  </div>
                 </div>
-                <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 hover:bg-emerald-400 transition">
-                  Accéder à mon programme
-                </button>
-              </form>
-              <div class="mt-5 border-t border-slate-800 pt-4">
-                <p class="text-[11px] text-slate-500 mb-2">Démo rapide athlète :</p>
-                <div class="flex flex-wrap gap-2">
-                  ${state.clients.map(c => `
-                    <button onclick="fillQuickLogin('${c.code}')" class="rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-1 text-xs text-slate-300 hover:border-emerald-500/50">
-                      ${c.name} (${c.code})
-                    </button>
-                  `).join("")}
+              `;
+            }).join("")}
+          </div>
+
+          <form onsubmit="createAthleteProfile(event)" class="lg:col-span-5 glass-panel rounded-2xl p-5 space-y-4 h-fit">
+            <h2 class="text-base font-bold text-white">Nouvel Athlète</h2>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Nom complet</label>
+              <input id="new-ath-name" type="text" required placeholder="Ex : Léa Martin" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Code d'accès unique</label>
+              <input id="new-ath-code" type="text" required placeholder="Ex : LEA-2026" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white uppercase" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Discipline</label>
+              <input id="new-ath-sport" type="text" placeholder="Ex : Cross-Training / Hypertrophie" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Objectif principal</label>
+              <input id="new-ath-obj" type="text" placeholder="Ex : Force & recomposition corporelle" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+            </div>
+            <button type="submit" class="w-full py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-extrabold text-sm transition">
+              Créer le profil Athlète
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    function renderCoachWorkoutsTab(selectedAth) {
+      const defaultWorkoutTitle = selectedAth?.workouts?.[0]?.title || "Séance A — Haut du Corps";
+      return `
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <form onsubmit="assignExerciseToAthlete(event)" class="lg:col-span-6 glass-panel rounded-2xl p-5 space-y-3.5">
+            <h2 class="text-base font-bold text-white">Assigner un Exercice + Guide Machine / Vidéo</h2>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Athlète cible</label>
+              <select id="assign-athlete-select" onchange="selectCoachAthlete(this.value)" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white">
+                ${appState.athletes.map((a) => `<option value="${a.id}" ${a.id === selectedAth?.id ? "selected" : ""}>${escapeHtml(a.name)} (${escapeHtml(a.code)})</option>`).join("")}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Nom de la séance</label>
+              <input id="assign-workout-title" type="text" value="${escapeHtml(defaultWorkoutTitle)}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Exercice</label>
+                <input id="assign-ex-name" type="text" required placeholder="Ex : Rowing Barre" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Machine / Matériel</label>
+                <input id="assign-ex-machine" type="text" placeholder="Ex : Barre olympique + disques" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Séries</label>
+                <input id="assign-ex-sets" type="number" min="1" max="8" value="4" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Reps cibles</label>
+                <input id="assign-ex-reps" type="text" value="8-12 reps" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Charge repère</label>
+                <input id="assign-ex-load" type="text" value="60 kg" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Repos (sec)</label>
+                <input id="assign-ex-rest" type="number" min="15" max="300" value="90" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Lien vidéo d'exécution (optionnel)</label>
+              <input id="assign-ex-video" type="url" placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Conseil d'exécution</label>
+              <textarea id="assign-ex-exec" rows="2" placeholder="Amplitude, tempo, respiration..." class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Réglage machine & sécurité</label>
+              <textarea id="assign-ex-machinetip" rows="2" placeholder="Hauteur siège, butées, placement pieds..." class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white"></textarea>
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-sm transition">
+              Assigner à la séance de l'athlète
+            </button>
+          </form>
+
+          <div class="lg:col-span-6 space-y-4">
+            <h2 class="text-base font-bold text-white">Programme actuel de ${escapeHtml(selectedAth?.name || "")}</h2>
+            ${(selectedAth?.workouts || []).map((wk) => `
+              <div class="glass-panel rounded-2xl p-4 space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <div>
+                    <h3 class="font-bold text-white">${escapeHtml(wk.title)}</h3>
+                    <p class="text-xs text-slate-400">${escapeHtml(wk.focus)} • Repos par défaut : ${wk.restDefault}s</p>
+                  </div>
+                  <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-sky-300 font-semibold">${wk.exercises.length} exos</span>
+                </div>
+                <div class="space-y-2">
+                  ${wk.exercises.map((ex) => {
+                    const doneCount = (ex.completedSets || []).filter(Boolean).length;
+                    return `
+                      <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                          <p class="text-sm font-semibold text-slate-100 truncate">${escapeHtml(ex.name)}</p>
+                          <p class="text-xs text-slate-400">${ex.setsCount} × ${escapeHtml(ex.repsTarget)} • ${escapeHtml(ex.loadHint)} • Repos ${ex.restSec}s</p>
+                        </div>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${doneCount === ex.setsCount ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-300'}">
+                          ${doneCount}/${ex.setsCount} séries
+                        </span>
+                      </div>
+                    `;
+                  }).join("")}
                 </div>
               </div>
-            ` : `
-              <form onsubmit="handleCoachLogin(event)" class="mt-6 space-y-4">
-                <div>
-                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Email Coach</label>
-                  <input id="coachEmailInput" type="email" placeholder="coach@btraining.fr" required
-                    class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none" />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Mot de passe</label>
-                  <input id="coachPassInput" type="password" placeholder="••••••••" required
-                    class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none" />
-                </div>
-                <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 text-sm font-bold text-slate-950 hover:bg-emerald-400 transition">
-                  Déverrouiller l'Espace Coach
-                </button>
-              </form>
-              <div class="mt-5 border-t border-slate-800 pt-4">
-                <button onclick="fillQuickLogin('coach')" class="w-full rounded-lg border border-slate-800 bg-slate-900 py-2 text-xs text-slate-300 hover:border-emerald-500/50">
-                  Remplir identifiants Coach par défaut
-                </button>
-              </div>
-            `}
+            `).join("")}
           </div>
         </div>
       `;
     }
 
-    function renderCoach() {
-      const selectedClient = state.clients.find(c => c.id === selectedClientId) || state.clients[0];
-
+    function renderCoachTrackingTab(selectedAth) {
       return `
-        <div class="min-h-screen pb-24">
-          <header class="sticky top-0 z-30 border-b border-slate-800 bg-[#0c1220]/95 backdrop-blur-md px-4 py-3">
-            <div class="mx-auto max-w-5xl flex flex-wrap items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500 font-black text-slate-950">B</div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-extrabold text-white">B training</span>
-                    <span class="rounded-md bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-400">Coach</span>
+        <div class="glass-panel rounded-2xl p-5 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-bold text-white">Suivi Biométrique & Nutritionnel — ${escapeHtml(selectedAth?.name || "")}</h2>
+              <p class="text-xs text-slate-400">Objectif : ${escapeHtml(selectedAth?.objective || "")}</p>
+            </div>
+            <select onchange="selectCoachAthlete(this.value)" class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-semibold text-white">
+              ${appState.athletes.map((a) => `<option value="${a.id}" ${a.id === selectedAth?.id ? "selected" : ""}>${escapeHtml(a.name)}</option>`).join("")}
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="bg-slate-950/75 border border-slate-800 rounded-2xl p-4 space-y-3">
+              <h3 class="text-sm font-bold text-sky-300 uppercase tracking-wider">Historique Biométrique</h3>
+              ${(selectedAth?.biometrics || []).slice().reverse().map((b) => `
+                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 text-xs space-y-1">
+                  <div class="flex justify-between font-bold text-slate-200">
+                    <span>${escapeHtml(b.date)}</span>
+                    <span class="text-emerald-300">${b.weightKg} kg ${b.bodyFatPct ? `• ${b.bodyFatPct}% MG` : ""}</span>
                   </div>
-                  <p id="syncBadge" class="text-[11px] text-slate-400">${syncStatus}</p>
+                  <p class="text-slate-400">Sommeil : ${b.sleepHours}h • ${escapeHtml(b.notes || "")}</p>
                 </div>
-              </div>
-              <button onclick="logout()" class="rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white">
-                Déconnexion
-              </button>
+              `).join("")}
             </div>
 
-            <nav class="mx-auto max-w-5xl mt-3 flex gap-2 overflow-x-auto pb-1">
-              ${[
-                { id: "clients", label: "Clients & Accès" },
-                { id: "program", label: "Programmes & Nutrition" },
-                { id: "library", label: "Bibliothèque & Vidéos" },
-                { id: "security", label: "Sécurité Coach" }
-              ].map(t => `
-                <button onclick="setCoachTab('${t.id}')" class="shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition ${coachTab === t.id ? 'bg-emerald-500 text-slate-950' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}">
-                  ${t.label}
-                </button>
+            <div class="bg-slate-950/75 border border-slate-800 rounded-2xl p-4 space-y-3">
+              <h3 class="text-sm font-bold text-emerald-300 uppercase tracking-wider">Logs Nutritionnels</h3>
+              ${(selectedAth?.nutritionLogs || []).slice().reverse().map((n) => `
+                <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 text-xs space-y-1">
+                  <div class="flex justify-between font-bold text-slate-200">
+                    <span>${escapeHtml(n.date)}</span>
+                    <span class="text-sky-300">${n.calories} kcal</span>
+                  </div>
+                  <p class="text-slate-400">P: ${n.proteinG}g • G: ${n.carbsG}g • L: ${n.fatsG}g • Eau: ${n.waterL}L</p>
+                </div>
               `).join("")}
-            </nav>
-          </header>
-
-          <main class="mx-auto max-w-5xl px-4 pt-6">
-            ${coachTab === "clients" ? `
-              <div class="grid gap-6 lg:grid-cols-3">
-                <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-5">
-                  <h2 class="text-base font-bold text-white mb-4">Nouvel Athlète</h2>
-                  <form onsubmit="createClient(event)" class="space-y-3">
-                    <input id="newClientName" type="text" placeholder="Nom complet (ex: Thomas Roy)" required class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                    <input id="newClientGoal" type="text" placeholder="Objectif (ex: Prise de masse)" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                    <div class="grid grid-cols-2 gap-2">
-                      <input id="newClientWeight" type="number" step="0.1" placeholder="Poids (kg)" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                      <input id="newClientTarget" type="number" step="0.1" placeholder="Cible (kg)" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                    </div>
-                    <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3 text-xs font-bold text-slate-950 hover:bg-emerald-400">
-                      + Créer la fiche & générer un code
-                    </button>
-                  </form>
-                </div>
-
-                <div class="lg:col-span-2 space-y-3">
-                  <h2 class="text-base font-bold text-white">Mes Athlètes (${state.clients.length})</h2>
-                  ${state.clients.map(c => `
-                    <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <div class="flex items-center gap-2">
-                          <h3 class="font-bold text-white">${c.name}</h3>
-                          <span class="rounded-full px-2 py-0.5 text-[10px] font-bold ${c.active ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}">
-                            ${c.active ? 'Actif' : 'Suspendu'}
-                          </span>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5">${c.goal} • ${c.weight} kg → ${c.targetWeight} kg</p>
-                        <div class="mt-2 inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1">
-                          <span class="text-[11px] text-slate-400">Code :</span>
-                          <span class="font-mono text-xs font-bold text-emerald-400">${c.code}</span>
-                        </div>
-                      </div>
-
-                      <div class="flex flex-wrap gap-2">
-                        <button onclick="copyInvite('${c.id}')" class="rounded-xl bg-emerald-500/15 border border-emerald-500/30 px-3 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/25">
-                          Copier invitation
-                        </button>
-                        <button onclick="previewClientAsCoach('${c.id}')" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700">
-                          Vue Client
-                        </button>
-                        <button onclick="regenerateClientCode('${c.id}')" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-xs text-slate-300 hover:text-white" title="Nouveau code">
-                          ↻ Code
-                        </button>
-                        <button onclick="toggleClientActive('${c.id}')" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-xs text-slate-300 hover:text-white">
-                          ${c.active ? 'Suspendre' : 'Activer'}
-                        </button>
-                      </div>
-                    </div>
-                  `).join("")}
-                </div>
-              </div>
-            ` : coachTab === "program" ? `
-              <div class="space-y-6">
-                <div class="flex flex-wrap items-center gap-2">
-                  <span class="text-xs font-bold text-slate-400">Athlète sélectionné :</span>
-                  ${state.clients.map(c => `
-                    <button onclick="selectClient('${c.id}')" class="rounded-xl px-3.5 py-2 text-xs font-bold ${selectedClient?.id === c.id ? 'bg-emerald-500 text-slate-950' : 'bg-slate-900 border border-slate-800 text-slate-300'}">
-                      ${c.name}
-                    </button>
-                  `).join("")}
-                </div>
-
-                ${selectedClient ? `
-                  <div class="grid gap-6 lg:grid-cols-2">
-                    <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-5 space-y-4">
-                      <h2 class="text-base font-bold text-white">Programme d'entraînement</h2>
-                      <div>
-                        <label class="block text-xs text-slate-400 mb-1">Nom de la séance</label>
-                        <input id="editWorkoutName" type="text" value="${selectedClient.workoutName}" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                      </div>
-
-                      <form onsubmit="addExerciseToClient(event)" class="rounded-xl border border-slate-800 bg-slate-900/70 p-3.5 space-y-3">
-                        <p class="text-xs font-bold text-emerald-400">+ Ajouter un exercice à la séance</p>
-                        <select id="progExSelect" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white">
-                          ${state.exercises.map(ex => `<option value="${ex.id}">${ex.name} (${ex.muscle})</option>`).join("")}
-                        </select>
-                        <div class="grid grid-cols-4 gap-2">
-                          <input id="progSets" type="number" value="4" placeholder="Séries" class="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white" />
-                          <input id="progReps" type="text" value="10-12" placeholder="Reps" class="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white" />
-                          <input id="progRest" type="number" value="90" placeholder="Repos (s)" class="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white" />
-                          <input id="progLoad" type="text" value="40 kg" placeholder="Charge" class="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs text-white" />
-                        </div>
-                        <button type="submit" class="w-full rounded-xl bg-slate-800 border border-slate-700 py-2 text-xs font-bold text-emerald-400 hover:bg-slate-700">
-                          Ajouter l'exercice
-                        </button>
-                      </form>
-
-                      <div class="space-y-2">
-                        ${selectedClient.workoutItems.map((item, idx) => {
-                          const ex = state.exercises.find(e => e.id === item.exerciseId);
-                          return `
-                            <div class="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5">
-                              <div>
-                                <p class="text-sm font-bold text-white">${idx + 1}. ${ex?.name || "Exercice"}</p>
-                                <p class="text-xs text-slate-400">${item.sets} séries × ${item.reps} • Charge : ${item.load} • Repos : ${item.rest}s</p>
-                              </div>
-                              <button onclick="removeWorkoutItem('${item.uid}')" class="text-xs font-bold text-rose-400 hover:text-rose-300">Retirer</button>
-                            </div>
-                          `;
-                        }).join("")}
-                      </div>
-                    </div>
-
-                    <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-5 space-y-4">
-                      <h2 class="text-base font-bold text-white">Plan Nutritionnel & Macros</h2>
-                      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        <div>
-                          <label class="block text-[11px] text-slate-400 mb-1">Calories</label>
-                          <input id="editCal" type="number" value="${selectedClient.nutrition.calories}" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" />
-                        </div>
-                        <div>
-                          <label class="block text-[11px] text-slate-400 mb-1">Protéines (g)</label>
-                          <input id="editProt" type="number" value="${selectedClient.nutrition.protein}" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" />
-                        </div>
-                        <div>
-                          <label class="block text-[11px] text-slate-400 mb-1">Glucides (g)</label>
-                          <input id="editCarbs" type="number" value="${selectedClient.nutrition.carbs}" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" />
-                        </div>
-                        <div>
-                          <label class="block text-[11px] text-slate-400 mb-1">Lipides (g)</label>
-                          <input id="editFats" type="number" value="${selectedClient.nutrition.fats}" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" />
-                        </div>
-                      </div>
-                      <div>
-                        <label class="block text-xs text-slate-400 mb-1">Répartition des repas</label>
-                        <textarea id="editMeals" rows="6" class="w-full rounded-xl border border-slate-700 bg-slate-950 p-3 text-sm text-white">${selectedClient.nutrition.meals}</textarea>
-                      </div>
-                      <button onclick="saveClientProgramAndNutrition()" class="w-full rounded-xl bg-emerald-500 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400">
-                        Enregistrer & Synchroniser le client
-                      </button>
-                    </div>
-                  </div>
-                ` : ""}
-              </div>
-            ` : coachTab === "library" ? `
-              <div class="grid gap-6 lg:grid-cols-3">
-                <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-5">
-                  <h2 class="text-base font-bold text-white mb-4">Ajouter un exercice + Vidéo</h2>
-                  <form onsubmit="addLibraryExercise(event)" class="space-y-3">
-                    <input id="libName" type="text" placeholder="Nom de l'exercice" required class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                    <input id="libMuscle" type="text" placeholder="Groupe musculaire (ex: Dos)" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                    <input id="libMachine" type="text" placeholder="Machine / Matériel précis" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                    <input id="libVideo" type="url" placeholder="Lien vidéo YouTube (https://...)" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                    <textarea id="libTips" rows="3" placeholder="Points clés d'exécution (1 par ligne)" class="w-full rounded-xl border border-slate-700 bg-slate-950 p-3 text-sm text-white"></textarea>
-                    <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3 text-xs font-bold text-slate-950 hover:bg-emerald-400">
-                      Enregistrer dans la bibliothèque
-                    </button>
-                  </form>
-                </div>
-
-                <div class="lg:col-span-2 grid gap-3 sm:grid-cols-2">
-                  ${state.exercises.map(ex => `
-                    <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4 flex flex-col justify-between">
-                      <div>
-                        <span class="text-[11px] font-bold uppercase text-emerald-400">${ex.muscle}</span>
-                        <h3 class="font-bold text-white mt-0.5">${ex.name}</h3>
-                        <p class="text-xs text-slate-400 mt-1">Matériel : ${ex.machine}</p>
-                      </div>
-                      <button onclick="openDemoModal('${ex.id}')" class="mt-4 w-full rounded-xl border border-slate-700 bg-slate-900 py-2 text-xs font-semibold text-emerald-400 hover:bg-slate-800">
-                        Tester la démo vidéo
-                      </button>
-                    </div>
-                  `).join("")}
-                </div>
-              </div>
-            ` : `
-              <div class="max-w-md rounded-2xl border border-slate-800 bg-[#0f172a] p-6">
-                <h2 class="text-base font-bold text-white mb-4">Identifiants Administrateur Coach</h2>
-                <form onsubmit="updateCoachCredentials(event)" class="space-y-4">
-                  <div>
-                    <label class="block text-xs text-slate-400 mb-1">Email de connexion Coach</label>
-                    <input id="secEmail" type="email" value="${state.coachAuth.email}" required class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                  </div>
-                  <div>
-                    <label class="block text-xs text-slate-400 mb-1">Nouveau mot de passe</label>
-                    <input id="secPass" type="text" value="${state.coachAuth.password}" required class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                  </div>
-                  <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400">
-                    Mettre à jour mes accès
-                  </button>
-                </form>
-              </div>
-            `}
-          </main>
+            </div>
+          </div>
         </div>
       `;
     }
 
-    function renderClient() {
-      const client = state.clients.find(c => c.id === session.clientId);
-      if (!client) {
-        logout();
-        return "";
-      }
-
-      const totalSets = client.workoutItems.reduce((acc, w) => acc + w.sets, 0);
-      const doneSets = client.workoutItems.reduce((acc, w) => acc + w.completedSets.filter(Boolean).length, 0);
-      const progressPct = totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0;
+    function renderAthleteDashboard() {
+      const ath = getAthleteById(session.athleteId);
+      const latestBio = ath.biometrics[ath.biometrics.length - 1];
+      const latestNut = ath.nutritionLogs[ath.nutritionLogs.length - 1];
 
       return `
-        <div class="min-h-screen pb-32">
-          ${session.previewByCoach ? `
-            <div class="bg-amber-500 px-4 py-2 text-center text-xs font-bold text-slate-950 flex items-center justify-center gap-3">
-              <span>Mode Aperçu Coach — Vue de ${client.name}</span>
-              <button onclick="returnToCoach()" class="rounded-lg bg-slate-950 px-2.5 py-1 text-white">Retour Coach</button>
+        <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 pb-28 space-y-6">
+          <!-- Athlete Header Card -->
+          <div class="glass-panel rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-sky-400">${escapeHtml(ath.sport)}</span>
+              <h1 class="text-xl sm:text-2xl font-extrabold text-white mt-0.5">${escapeHtml(ath.name)}</h1>
+              <p class="text-xs sm:text-sm text-slate-400 mt-1">${escapeHtml(ath.objective)}</p>
             </div>
-          ` : ""}
-
-          <header class="sticky top-0 z-30 border-b border-slate-800 bg-[#0c1220]/95 backdrop-blur-md px-4 py-3">
-            <div class="mx-auto max-w-2xl flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500 font-black text-slate-950">B</div>
-                <div>
-                  <h1 class="text-sm font-extrabold text-white">${client.name}</h1>
-                  <p class="text-[11px] text-emerald-400">${client.goal}</p>
-                </div>
-              </div>
-              <button onclick="logout()" class="rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300">
-                Quitter
+            <div class="flex gap-2">
+              <button type="button" onclick="setAthleteTab('workout')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.athleteActiveTab === 'workout' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
+                Séance & Repos
+              </button>
+              <button type="button" onclick="setAthleteTab('tracking')" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition ${session.athleteActiveTab === 'tracking' ? 'bg-emerald-400 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}">
+                Biométrie & Nutrition
               </button>
             </div>
+          </div>
 
-            <div class="mx-auto max-w-2xl mt-3 grid grid-cols-3 gap-2">
-              ${[
-                { id: "workout", label: "Ma Séance" },
-                { id: "nutrition", label: "Nutrition" },
-                { id: "progress", label: "Suivi Poids" }
-              ].map(t => `
-                <button onclick="setClientTab('${t.id}')" class="rounded-xl py-2 text-xs font-bold transition ${clientTab === t.id ? 'bg-emerald-500 text-slate-950' : 'bg-slate-900 text-slate-400 border border-slate-800'}">
-                  ${t.label}
+          ${session.athleteActiveTab === "workout"
+            ? renderAthleteWorkouts(ath)
+            : renderAthleteTracking(ath, latestBio, latestNut)}
+        </main>
+      `;
+    }
+
+    window.setAthleteTab = function(tab) {
+      session.athleteActiveTab = tab;
+      render();
+    };
+
+    function renderAthleteWorkouts(ath) {
+      return `
+        <div class="space-y-6">
+          ${ath.workouts.map((wk) => `
+            <section class="space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 class="text-lg font-extrabold text-white">${escapeHtml(wk.title)}</h2>
+                  <p class="text-xs text-slate-400">${escapeHtml(wk.focus)} • Repos auto : ${wk.restDefault}s par défaut</p>
+                </div>
+                <button type="button" onclick="commitLoggedLoads()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-sky-300 border border-slate-700 transition">
+                  Sauvegarder les charges
                 </button>
-              `).join("")}
-            </div>
-          </header>
-
-          <main class="mx-auto max-w-2xl px-4 pt-5">
-            ${clientTab === "workout" ? `
-              <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4 mb-5">
-                <div class="flex items-center justify-between gap-2">
-                  <div>
-                    <span class="text-[11px] font-bold uppercase text-emerald-400">Programme actif</span>
-                    <h2 class="text-lg font-extrabold text-white">${client.workoutName}</h2>
-                  </div>
-                  <button onclick="resetClientWorkout()" class="rounded-xl border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white">
-                    Réinitialiser
-                  </button>
-                </div>
-                <div class="mt-3">
-                  <div class="flex justify-between text-xs text-slate-400 mb-1">
-                    <span>Progression séance</span>
-                    <span class="font-bold text-emerald-400">${doneSets}/${totalSets} séries (${progressPct}%)</span>
-                  </div>
-                  <div class="h-2 w-full overflow-hidden rounded-full bg-slate-800">
-                    <div class="h-full bg-emerald-500 transition-all duration-300" style="width: ${progressPct}%"></div>
-                  </div>
-                </div>
               </div>
 
               <div class="space-y-4">
-                ${client.workoutItems.map((item, idx) => {
-                  const ex = state.exercises.find(e => e.id === item.exerciseId);
+                ${wk.exercises.map((ex) => {
+                  const completedArr = Array.from({ length: ex.setsCount }, (_, i) => Boolean(ex.completedSets?.[i]));
+                  const loadsArr = Array.from({ length: ex.setsCount }, (_, i) => ex.loggedLoads?.[i] || `${ex.loadHint} x ${ex.repsTarget}`);
                   return `
-                    <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4">
-                      <div class="flex items-start justify-between gap-3">
+                    <article class="glass-panel rounded-2xl p-4 sm:p-5 space-y-4 border border-slate-800">
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                          <span class="text-[11px] font-bold uppercase text-emerald-400">Exercice ${idx + 1} • ${ex?.muscle || ""}</span>
-                          <h3 class="text-base font-bold text-white mt-0.5">${ex?.name || "Exercice"}</h3>
-                          <p class="text-xs text-slate-400 mt-0.5">Machine : ${ex?.machine || "Standard"}</p>
+                          <h3 class="text-base sm:text-lg font-bold text-white">${escapeHtml(ex.name)}</h3>
+                          <p class="text-xs text-slate-400 mt-0.5">${escapeHtml(ex.machine || "Matériel libre")} • Cible : <strong class="text-slate-200">${ex.setsCount} × ${escapeHtml(ex.repsTarget)}</strong> • Repos : <strong class="text-sky-300">${ex.restSec || wk.restDefault}s</strong></p>
                         </div>
-                        <button onclick="openDemoModal('${item.exerciseId}')" class="shrink-0 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/25">
-                          ▶ Démo vidéo
+                        <button type="button" onclick="openExerciseGuideModal('${ath.id}', '${wk.id}', '${ex.id}')" class="px-3.5 py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/35 text-xs font-bold text-sky-300 shrink-0 transition">
+                          Guide Machine & Vidéo
                         </button>
                       </div>
 
-                      <div class="mt-3 flex flex-wrap gap-2 text-xs">
-                        <span class="rounded-lg bg-slate-900 border border-slate-800 px-2.5 py-1 text-slate-300">Objectif : <strong>${item.reps} reps</strong></span>
-                        <span class="rounded-lg bg-slate-900 border border-slate-800 px-2.5 py-1 text-slate-300">Charge : <strong>${item.load}</strong></span>
-                        <span class="rounded-lg bg-slate-900 border border-slate-800 px-2.5 py-1 text-emerald-400">Repos auto : <strong>${item.rest}s</strong></span>
+                      <!-- Quick Execution & Machine Tip Callout -->
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                        <div class="p-3 rounded-xl bg-slate-950/75 border border-slate-800/80">
+                          <span class="font-bold text-emerald-300 block mb-0.5">Exécution</span>
+                          <span class="text-slate-300 line-clamp-2">${escapeHtml(ex.executionTip)}</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-950/75 border border-slate-800/80">
+                          <span class="font-bold text-sky-300 block mb-0.5">Réglage Machine</span>
+                          <span class="text-slate-300 line-clamp-2">${escapeHtml(ex.machineTip)}</span>
+                        </div>
                       </div>
 
-                      <div class="mt-4 space-y-2">
-                        ${item.completedSets.map((done, sIdx) => `
-                          <button onclick="toggleSetDone('${item.uid}', ${sIdx})"
-                            class="w-full flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition ${done ? 'border-emerald-500/50 bg-emerald-500/15 text-emerald-300' : 'border-slate-800 bg-slate-950 text-slate-200 hover:border-slate-700'}">
-                            <span>Série ${sIdx + 1} • ${item.reps} reps (${item.load})</span>
-                            <span class="flex h-6 w-6 items-center justify-center rounded-lg text-xs font-black ${done ? 'bg-emerald-500 text-slate-950' : 'border border-slate-700 bg-slate-900 text-slate-500'}">
-                              ${done ? '✓' : ''}
-                            </span>
-                          </button>
+                      <!-- Interactive Sets Checkmarks (Auto-starts rest timer when checked) -->
+                      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                        ${completedArr.map((isDone, idx) => `
+                          <label class="flex items-center justify-between gap-2 p-3 rounded-xl border cursor-pointer transition ${isDone ? 'bg-emerald-500/15 border-emerald-400/40' : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'}">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                              <input
+                                type="checkbox"
+                                ${isDone ? "checked" : ""}
+                                onchange="toggleAthleteSet('${ath.id}', '${wk.id}', '${ex.id}', ${idx})"
+                                class="set-checkbox h-5 w-5 rounded-md border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-400 shrink-0 cursor-pointer"
+                              />
+                              <div class="min-w-0">
+                                <span class="text-xs font-bold block ${isDone ? 'text-emerald-300' : 'text-slate-200'}">Série ${idx + 1}</span>
+                                <input
+                                  type="text"
+                                  value="${escapeHtml(loadsArr[idx])}"
+                                  onchange="updateLoggedLoad('${ath.id}', '${wk.id}', '${ex.id}', ${idx}, this.value)"
+                                  onclick="event.stopPropagation()"
+                                  class="w-full bg-transparent text-xs text-slate-400 focus:text-white focus:outline-none truncate"
+                                  aria-label="Charge série ${idx + 1}"
+                                />
+                              </div>
+                            </div>
+                          </label>
                         `).join("")}
                       </div>
-                    </div>
+                    </article>
                   `;
                 }).join("")}
               </div>
-            ` : clientTab === "nutrition" ? `
-              <div class="space-y-4">
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4 text-center">
-                    <p class="text-xs text-slate-400">Calories</p>
-                    <p class="text-xl font-black text-white mt-1">${client.nutrition.calories}</p>
-                    <p class="text-[11px] text-emerald-400">kcal / jour</p>
-                  </div>
-                  <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4 text-center">
-                    <p class="text-xs text-slate-400">Protéines</p>
-                    <p class="text-xl font-black text-emerald-400 mt-1">${client.nutrition.protein}g</p>
-                  </div>
-                  <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4 text-center">
-                    <p class="text-xs text-slate-400">Glucides</p>
-                    <p class="text-xl font-black text-sky-400 mt-1">${client.nutrition.carbs}g</p>
-                  </div>
-                  <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4 text-center">
-                    <p class="text-xs text-slate-400">Lipides</p>
-                    <p class="text-xl font-black text-amber-400 mt-1">${client.nutrition.fats}g</p>
-                  </div>
-                </div>
+            </section>
+          `).join("")}
+        </div>
+      `;
+    }
 
-                <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-5">
-                  <h2 class="text-base font-bold text-white mb-3">Plan alimentaire du Coach</h2>
-                  <div class="whitespace-pre-line rounded-xl border border-slate-800 bg-slate-950 p-4 text-sm leading-relaxed text-slate-300">${client.nutrition.meals}</div>
+    function renderAthleteTracking(ath, latestBio, latestNut) {
+      const target = ath.nutritionTarget || { calories: 2900, proteinG: 170, carbsG: 320, fatsG: 80, waterL: 3.0 };
+      return `
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Check-in Form -->
+          <form onsubmit="addAthleteCheckin(event, '${ath.id}')" class="lg:col-span-6 glass-panel rounded-2xl p-5 space-y-4">
+            <h2 class="text-base font-bold text-white">Nouveau Check-in Biométrique & Nutritionnel</h2>
+
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Poids (kg)</label>
+                <input id="checkin-weight" type="number" step="0.1" value="${latestBio?.weightKg ?? 78.0}" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">% MG</label>
+                <input id="checkin-bf" type="number" step="0.1" value="${latestBio?.bodyFatPct ?? 13.0}" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Sommeil (h)</label>
+                <input id="checkin-sleep" type="number" step="0.1" value="${latestBio?.sleepHours ?? 7.8}" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Ressenti / Notes biométriques</label>
+              <input id="checkin-notes" type="text" placeholder="Énergie, courbatures, récupération..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+            </div>
+
+            <div class="pt-2 border-t border-slate-800">
+              <p class="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-2.5">Apports Nutritionnels du Jour (Cible : ${target.calories} kcal)</p>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Kcal</label>
+                  <input id="nut-calories" type="number" value="${latestNut?.calories ?? target.calories}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Prot (g)</label>
+                  <input id="nut-protein" type="number" value="${latestNut?.proteinG ?? target.proteinG}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Gluc (g)</label>
+                  <input id="nut-carbs" type="number" value="${latestNut?.carbsG ?? target.carbsG}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Lip (g)</label>
+                  <input id="nut-fats" type="number" value="${latestNut?.fatsG ?? target.fatsG}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Eau (L)</label>
+                  <input id="nut-water" type="number" step="0.1" value="${latestNut?.waterL ?? target.waterL}" class="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white" />
                 </div>
               </div>
-            ` : `
-              <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4">
-                    <p class="text-xs text-slate-400">Poids actuel</p>
-                    <p class="text-2xl font-black text-white mt-1">${client.weight} kg</p>
-                  </div>
-                  <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4">
-                    <p class="text-xs text-slate-400">Objectif cible</p>
-                    <p class="text-2xl font-black text-emerald-400 mt-1">${client.targetWeight} kg</p>
-                  </div>
-                </div>
+            </div>
 
-                <form onsubmit="logClientWeight(event)" class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4 flex gap-2">
-                  <input id="clientWeightInput" type="number" step="0.1" placeholder="Nouvelle pesée (kg)" required class="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-white" />
-                  <button type="submit" class="rounded-xl bg-emerald-500 px-4 py-2.5 text-xs font-bold text-slate-950 hover:bg-emerald-400">
-                    Enregistrer
-                  </button>
-                </form>
+            <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-400 to-emerald-400 text-slate-950 font-extrabold text-sm transition">
+              Enregistrer mon check-in
+            </button>
+          </form>
 
-                <div class="rounded-2xl border border-slate-800 bg-[#0f172a] p-4">
-                  <h3 class="text-sm font-bold text-white mb-3">Historique des pesées</h3>
-                  <div class="space-y-2">
-                    ${client.weightHistory.slice().reverse().map(entry => `
-                      <div class="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm">
-                        <span class="text-slate-400">${entry.date}</span>
-                        <span class="font-bold text-white">${entry.val} kg</span>
-                      </div>
-                    `).join("")}
+          <!-- Recent Logs Summary -->
+          <div class="lg:col-span-6 space-y-4">
+            <div class="glass-panel rounded-2xl p-5 space-y-3">
+              <h3 class="text-sm font-bold text-sky-300 uppercase tracking-wider">Derniers relevés biométriques</h3>
+              ${ath.biometrics.slice().reverse().slice(0, 4).map((b) => `
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs">
+                  <div>
+                    <p class="font-bold text-white">${escapeHtml(b.date)} — ${b.weightKg} kg</p>
+                    <p class="text-slate-400">${escapeHtml(b.notes || "")}</p>
                   </div>
+                  <span class="text-emerald-300 font-semibold">${b.sleepHours}h sommeil</span>
                 </div>
-              </div>
-            `}
-          </main>
+              `).join("")}
+            </div>
+
+            <div class="glass-panel rounded-2xl p-5 space-y-3">
+              <h3 class="text-sm font-bold text-emerald-300 uppercase tracking-wider">Derniers logs nutritionnels</h3>
+              ${ath.nutritionLogs.slice().reverse().slice(0, 4).map((n) => `
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs">
+                  <div>
+                    <p class="font-bold text-white">${escapeHtml(n.date)} — ${n.calories} kcal</p>
+                    <p class="text-slate-400">Prot ${n.proteinG}g • Gluc ${n.carbsG}g • Lip ${n.fatsG}g</p>
+                  </div>
+                  <span class="text-sky-300 font-semibold">${n.waterL}L eau</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
         </div>
       `;
     }
 
     function render() {
-      const appEl = document.getElementById("app");
-      if (!session) {
-        appEl.innerHTML = renderLogin();
+      const root = document.getElementById("app");
+      if (!root) return;
+
+      let screenHtml = "";
+      if (!session.role) {
+        screenHtml = renderLoginScreen();
       } else if (session.role === "coach") {
-        appEl.innerHTML = renderCoach();
+        screenHtml = renderCoachDashboard();
       } else {
-        appEl.innerHTML = renderClient();
+        screenHtml = renderAthleteDashboard();
       }
+
+      root.innerHTML = renderTopBar() + screenHtml;
+      updateConnectionBadge();
     }
 
+    // Boot application & connect Firestore
     render();
-    initFirestore();
+    initFirebaseSync();
   </script>
 </body>
 </html>
